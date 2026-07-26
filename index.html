@@ -843,7 +843,7 @@
             document.getElementById('pdfSubtotal').innerText = formatRupiah(sumGross);
             document.getElementById('pdfDiskonTambahan').innerText = "- " + formatRupiah(diskonTambahan);
             document.getElementById('pdfPPN').innerText = "+ " + formatRupiah(ppnVal);
-            document.getElementById('pdfPPh').innerText = "+ " + formatRupiah(ppphVal || pphVal);
+            document.getElementById('pdfPPh').innerText = "+ " + formatRupiah(pphVal);
             document.getElementById('pdfGrandTotal').innerText = formatRupiah(grandTotal < 0 ? 0 : grandTotal);
         }
 
