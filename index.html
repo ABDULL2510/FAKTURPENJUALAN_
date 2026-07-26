@@ -646,6 +646,8 @@
 
             const total = (harga * qty) - diskon;
 
+            // MENGAMBIL KODE BARANG DARI KOLOM A SHEET OPERATOR BARANG (barang.kode)
+            // KODE BARANG HANYA DICATAT DI PROPERTI 'kodeBarang' UNTUK DISIMPAN DI KOLOM P SHEET PENJUALAN
             cartItems.push({
                 kodeBarang: barang.kode || '', 
                 namaBarang: barang.nama,
