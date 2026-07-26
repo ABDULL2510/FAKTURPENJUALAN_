@@ -737,56 +737,58 @@
         }
 
         function downloadPDF() {
-            const btn = document.getElementById('btnDownloadPDF');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses & Mengunggah...';
+    const btn = document.getElementById('btnDownloadPDF');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses & Mengunggah...';
 
-            const element = document.getElementById('invoiceArea');
-            const opt = {
-                margin:       0.5,
-                filename:     `Faktur_${currentKodeUnik || 'Penjualan'}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
+    const element = document.getElementById('invoiceArea');
+    const opt = {
+        margin:       0.5,
+        filename:     `Faktur_${currentKodeUnik || 'Penjualan'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
 
-            // 1. Download file PDF secara lokal
-            html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
-                // Download file lokal ke perangkat user
-                html2pdf().set(opt).from(element).save();
+    // 1. Generate PDF sebagai Blob / Base64
+    html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
+        // Download file lokal ke perangkat user
+        html2pdf().set(opt).from(element).save();
 
-                // 2. Kirim PDF Base64 ke Google Apps Script untuk disimpan ke Drive & di-link ke Kolom K
-                const payload = {
-                    kodeUnik: currentKodeUnik,
-                    folderId: DRIVE_FOLDER_ID,
-                    fileName: `Faktur_${currentKodeUnik}.pdf`,
-                    pdfBase64: pdfBase64
-                };
+        // Bersihkan prefix 'data:application/pdf;filename=generated.pdf;base64,' jika ada
+        const base64Clean = pdfBase64.split(',')[1] || pdfBase64;
 
-                const targetUrl = `${DEFAULT_APP_URL}?action=uploadPdfDrive&data=${encodeURIComponent(JSON.stringify(payload))}`;
+        // 2. Kirim PDF Base64 menggunakan POST ke Google Apps Script
+        const payload = {
+            action: "uploadPdfDrive",
+            kodeUnik: currentKodeUnik,
+            folderId: DRIVE_FOLDER_ID,
+            fileName: `Faktur_${currentKodeUnik}.pdf`,
+            pdfBase64: base64Clean
+        };
 
-                fetch(targetUrl, {
-                    method: 'GET',
-                    redirect: 'follow'
-                })
-                .then(res => res.json())
-                .then(res => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive';
-                    if(res.status === 'success') {
-                        alert('PDF berhasil di-generate, diunduh, dan disimpan ke Google Drive (Kolom K terupdate)!');
-                    } else {
-                        alert('PDF diunduh lokal, namun gagal upload Drive: ' + res.message);
-                    }
-                })
-                .catch(err => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive';
-                    console.error(err);
-                    alert('PDF diunduh lokal. Terjadi kesalahan koneksi saat mengunggah ke Drive.');
-                });
-            });
-        }
+        fetch(DEFAULT_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(res => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive';
+            if(res.status === 'success') {
+                alert('PDF berhasil di-generate, diunduh, dan tersimpan di Google Drive (Kolom K terisi link PDF)!');
+            } else {
+                alert('PDF diunduh lokal, namun gagal upload ke Drive: ' + res.message);
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive';
+            console.error(err);
+            alert('PDF diunduh lokal. Terjadi kesalahan saat mengunggah ke Drive.');
+        });
+    });
+}
 
         function formatRupiah(val) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
