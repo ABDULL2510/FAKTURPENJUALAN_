@@ -354,7 +354,7 @@
                     <div class="w-full sm:w-1/2 text-xs space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
                         <div class="flex justify-between">
                             <span class="text-slate-600 font-medium">Subtotal:</span>
-                            <span font-semibold id="pdfSubtotal" class="font-semibold text-slate-800">Rp 0</span>
+                            <span id="pdfSubtotal" class="font-semibold text-slate-800">Rp 0</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-slate-600 font-medium">Diskon Tambahan:</span>
@@ -387,7 +387,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // URL WEB APP APPS SCRIPT LANGSUNG DI EMBED
+        // URL WEB APP APPS SCRIPT
         const DEFAULT_APP_URL = "https://script.google.com/macros/s/AKfycbwzrBnpSDCJRu-eCX3a-VktlTiyoR6no2epaNlSH1-fIAhVLsKoPxXBjsJ6BQQqln22/exec";
 
         let masterPelanggan = [];
@@ -416,7 +416,10 @@
             const icon = document.getElementById('refreshIcon');
             icon.classList.add('fa-spin');
 
-            fetch(`${DEFAULT_APP_URL}?action=getDataMaster`)
+            fetch(`${DEFAULT_APP_URL}?action=getDataMaster`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
                 .then(res => res.json())
                 .then(res => {
                     icon.classList.remove('fa-spin');
@@ -433,7 +436,7 @@
                 });
         }
 
-        // --- SUGGEST LOGIC: PELANGGAN (CARI DARI KOLOM D, KODE TERAMBIL SEJAJAR DARI KOLOM B) ---
+        // --- SUGGEST LOGIC: PELANGGAN ---
         function filterPelangganSuggest() {
             const input = document.getElementById('searchPelanggan').value.toLowerCase();
             const box = document.getElementById('suggestPelangganBox');
@@ -443,7 +446,6 @@
                 document.getElementById('kodePelanggan').value = "";
             }
 
-            // Cari Nama dari Kolom D
             const filtered = masterPelanggan.filter(p => p.nama && p.nama.toLowerCase().includes(input));
 
             if(filtered.length === 0) {
@@ -464,9 +466,9 @@
 
         function selectPelangganItem(idx) {
             const p = masterPelanggan[idx];
-            document.getElementById('searchPelanggan').value = p.nama;       // Kolom D (Nama)
+            document.getElementById('searchPelanggan').value = p.nama;
             document.getElementById('selectPelanggan').value = idx;
-            document.getElementById('kodePelanggan').value = p.kode || '-';  // Kolom B (Kode Pelanggan Sejajar)
+            document.getElementById('kodePelanggan').value = p.kode || '-';
             document.getElementById('suggestPelangganBox').classList.add('hidden');
         }
 
@@ -625,63 +627,63 @@
         }
 
         // SUBMIT DATA RESUME KE SPREADSHEET
-       function submitToSpreadsheet() {
-    const pelangganIdx = document.getElementById('selectPelanggan').value;
-    if (pelangganIdx === "") {
-        alert('Silakan pilih pelanggan terlebih dahulu!');
-        return;
-    }
-    if (cartItems.length === 0) {
-        alert('Tabel item masih kosong!');
-        return;
-    }
+        function submitToSpreadsheet() {
+            const pelangganIdx = document.getElementById('selectPelanggan').value;
+            if(pelangganIdx === "") {
+                alert('Silakan pilih pelanggan dari daftar suggestion terlebih dahulu!');
+                return;
+            }
+            if(cartItems.length === 0) {
+                alert('Tabel item masih kosong! Silakan collect item terlebih dahulu.');
+                return;
+            }
 
-    const namaPelanggan = masterPelanggan[pelangganIdx].nama;
-    const kodePelanggan = document.getElementById('kodePelanggan').value;
-    const tgl = document.getElementById('tglTransaksi').value;
-    const diskonTambahan = parseFloat(document.getElementById('inputDiskonTambahan').value) || 0;
-    
-    const payload = {
-        namaPelanggan: namaPelanggan,
-        kodePelanggan: kodePelanggan,
-        tanggal: tgl,
-        diskonTambahan: diskonTambahan,
-        items: cartItems
-    };
-
-    const submitBtn = document.getElementById('btnSubmitResume');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Spreadsheet...';
-
-    // Encode payload untuk dikirimkan melalui GET agar terhindar dari CORS blokir POST
-    const targetUrl = `${DEFAULT_APP_URL}?action=submitFakturData&data=${encodeURIComponent(JSON.stringify(payload))}`;
-
-    fetch(targetUrl, {
-        method: 'GET',
-        redirect: 'follow'
-    })
-    .then(res => res.json())
-    .then(res => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
-
-        if (res.status === 'success') {
-            currentKodeUnik = res.kodeUnik;
-            alert(`Berhasil Submit ke Spreadsheet! Kode Unik: ${res.kodeUnik}`);
+            const namaPelanggan = masterPelanggan[pelangganIdx].nama;
+            const kodePelanggan = document.getElementById('kodePelanggan').value;
+            const tgl = document.getElementById('tglTransaksi').value;
+            const diskonTambahan = parseFloat(document.getElementById('inputDiskonTambahan').value) || 0;
             
-            prepareResumeTab(namaPelanggan, kodePelanggan, tgl, diskonTambahan, res.kodeUnik);
-            switchTab(2);
-        } else {
-            alert('Gagal submit data: ' + res.message);
+            const payload = {
+                namaPelanggan: namaPelanggan,
+                kodePelanggan: kodePelanggan,
+                tanggal: tgl,
+                diskonTambahan: diskonTambahan,
+                items: cartItems
+            };
+
+            const submitBtn = document.getElementById('btnSubmitResume');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Spreadsheet...';
+
+            // Menambahkan redirect: 'follow' untuk menangani Google Apps Script Redirect
+            const targetUrl = `${DEFAULT_APP_URL}?action=submitFakturData&data=${encodeURIComponent(JSON.stringify(payload))}`;
+
+            fetch(targetUrl, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+                .then(res => res.json())
+                .then(res => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
+
+                    if(res.status === 'success') {
+                        currentKodeUnik = res.kodeUnik;
+                        alert(`Berhasil Submit ke Spreadsheet! Kode Unik: ${res.kodeUnik}`);
+                        
+                        prepareResumeTab(namaPelanggan, kodePelanggan, tgl, diskonTambahan, res.kodeUnik);
+                        switchTab(2);
+                    } else {
+                        alert('Gagal submit data: ' + res.message);
+                    }
+                })
+                .catch(err => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
+                    console.error(err);
+                    alert('Terjadi kesalahan koneksi. Pastikan Web App Apps Script sudah dideploy ulang ke "Anyone".');
+                });
         }
-    })
-    .catch(err => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
-        console.error(err);
-        alert('Terjadi kesalahan koneksi. Pastikan Web App Apps Script sudah dideploy ulang ke "Anyone".');
-    });
-}
 
         function prepareResumeTab(namaPelanggan, kodePelanggan, tgl, diskonTambahan, kodeUnik) {
             document.getElementById('pdfKodeUnik').innerText = kodeUnik;
