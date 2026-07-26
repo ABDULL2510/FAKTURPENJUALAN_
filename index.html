@@ -71,7 +71,7 @@
 </head>
 <body class="min-h-screen pb-16 bg-slate-50 text-slate-800">
 
-    <!-- Header Navigation (LOGO WEB DIGANTI DENGAN ID DRIVE TERBARU) -->
+    <!-- Header Navigation -->
     <header class="glass-header text-white shadow-md relative overflow-hidden">
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -125,7 +125,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- NAMA PELANGGAN WITH AUTO-SUGGEST (REF KOLOM D) -->
+                    <!-- NAMA PELANGGAN WITH AUTO-SUGGEST (KOLOM D / Index 3) -->
                     <div class="relative">
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Pelanggan (Kolom D)</label>
                         <div class="relative">
@@ -137,7 +137,7 @@
                         <div id="suggestPelangganBox" class="hidden absolute z-30 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100"></div>
                     </div>
 
-                    <!-- KODE PELANGGAN (SEJAJAR KOLOM B) -->
+                    <!-- KODE PELANGGAN (KOLOM B / Index 1) -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kode Pelanggan (Kolom B)</label>
                         <input type="text" id="kodePelanggan" readonly placeholder="Otomatis terisi..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono text-slate-700 font-semibold cursor-not-allowed">
@@ -370,10 +370,9 @@
             <!-- FAKTUR PENJUALAN (Cetak/PDF) -->
             <div id="invoiceArea" class="invoice-paper p-6 sm:p-8 rounded-2xl mx-auto text-slate-800">
                 
-                <!-- KOP BENGKEL / HEADER PERUSAHAAN (LOGO KOP TETAP SAMA) -->
+                <!-- KOP BENGKEL / HEADER PERUSAHAAN -->
                 <div class="flex justify-between items-center border-b-2 border-slate-800 pb-4 mb-5">
                     <div class="flex items-center gap-4">
-                        <!-- LOGO KOP FAKTUR (ID SAMA SEPERTI SEBELUMNYA) -->
                         <img src="https://lh3.googleusercontent.com/d/1GAPrkrsiup-gN5qlU4XcUlmkDuz1tDDj" alt="Logo Bengkel" class="w-16 h-16 object-contain shrink-0">
                         
                         <div>
@@ -556,13 +555,24 @@
             box.classList.remove('hidden');
         }
 
+        /*
+           MAPPING DIPASTIKAN PRESISI SESUAI BAGIAN C (doGet):
+           p.kode            <- Column B (index 1)
+           p.nama            <- Column D (index 3)
+           p.telepon         <- Column F (index 5)
+           p.alamat          <- Column G (index 6)
+           p.nopol           <- Column H (index 7)
+           p.jenisKendaraan  <- Column I (index 8)
+           p.kmServis        <- Column J (index 9)
+           p.admin           <- Column K (index 10)
+        */
         function selectPelangganItem(idx) {
             const p = masterPelanggan[idx];
             document.getElementById('searchPelanggan').value = p.nama;
             document.getElementById('selectPelanggan').value = idx;
             document.getElementById('kodePelanggan').value = p.kode || '-';
 
-            // Automatic Mapping dari Sheet DATA PELANGGAN
+            // Mapping otomatis ke input field
             document.getElementById('pelangganNopol').value = p.nopol || '-';           
             document.getElementById('pelangganJenisKendaraan').value = p.jenisKendaraan || '-'; 
             document.getElementById('pelangganAlamat').value = p.alamat || '-';         
