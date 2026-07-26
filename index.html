@@ -294,8 +294,8 @@
                     <button onclick="switchTab(1)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all">
                         <i class="fa-solid fa-arrow-left mr-1"></i> Kembali Edit
                     </button>
-                    <button onclick="downloadPDF()" class="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md shadow-rose-600/20 transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur
+                    <button id="btnDownloadPDF" onclick="downloadPDF()" class="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md shadow-rose-600/20 transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive
                     </button>
                 </div>
             </div>
@@ -389,6 +389,7 @@
     <script>
         // URL WEB APP APPS SCRIPT
         const DEFAULT_APP_URL = "https://script.google.com/macros/s/AKfycbwzrBnpSDCJRu-eCX3a-VktlTiyoR6no2epaNlSH1-fIAhVLsKoPxXBjsJ6BQQqln22/exec";
+        const DRIVE_FOLDER_ID = "1g-Q0vLrEqoXycbrEU9fREkYlWowyD24q";
 
         let masterPelanggan = [];
         let masterBarang = [];
@@ -655,7 +656,6 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Spreadsheet...';
 
-            // Menambahkan redirect: 'follow' untuk menangani Google Apps Script Redirect
             const targetUrl = `${DEFAULT_APP_URL}?action=submitFakturData&data=${encodeURIComponent(JSON.stringify(payload))}`;
 
             fetch(targetUrl, {
@@ -737,6 +737,10 @@
         }
 
         function downloadPDF() {
+            const btn = document.getElementById('btnDownloadPDF');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses & Mengunggah...';
+
             const element = document.getElementById('invoiceArea');
             const opt = {
                 margin:       0.5,
@@ -745,7 +749,43 @@
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
-            html2pdf().set(opt).from(element).save();
+
+            // 1. Download file PDF secara lokal
+            html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
+                // Download file lokal ke perangkat user
+                html2pdf().set(opt).from(element).save();
+
+                // 2. Kirim PDF Base64 ke Google Apps Script untuk disimpan ke Drive & di-link ke Kolom K
+                const payload = {
+                    kodeUnik: currentKodeUnik,
+                    folderId: DRIVE_FOLDER_ID,
+                    fileName: `Faktur_${currentKodeUnik}.pdf`,
+                    pdfBase64: pdfBase64
+                };
+
+                const targetUrl = `${DEFAULT_APP_URL}?action=uploadPdfDrive&data=${encodeURIComponent(JSON.stringify(payload))}`;
+
+                fetch(targetUrl, {
+                    method: 'GET',
+                    redirect: 'follow'
+                })
+                .then(res => res.json())
+                .then(res => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive';
+                    if(res.status === 'success') {
+                        alert('PDF berhasil di-generate, diunduh, dan disimpan ke Google Drive (Kolom K terupdate)!');
+                    } else {
+                        alert('PDF diunduh lokal, namun gagal upload Drive: ' + res.message);
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive';
+                    console.error(err);
+                    alert('PDF diunduh lokal. Terjadi kesalahan koneksi saat mengunggah ke Drive.');
+                });
+            });
         }
 
         function formatRupiah(val) {
