@@ -625,57 +625,63 @@
         }
 
         // SUBMIT DATA RESUME KE SPREADSHEET
-        function submitToSpreadsheet() {
-            const pelangganIdx = document.getElementById('selectPelanggan').value;
-            if(pelangganIdx === "") {
-                alert('Silakan pilih pelanggan dari daftar suggestion terlebih dahulu!');
-                return;
-            }
-            if(cartItems.length === 0) {
-                alert('Tabel item masih kosong! Silakan collect item terlebih dahulu.');
-                return;
-            }
+       function submitToSpreadsheet() {
+    const pelangganIdx = document.getElementById('selectPelanggan').value;
+    if (pelangganIdx === "") {
+        alert('Silakan pilih pelanggan terlebih dahulu!');
+        return;
+    }
+    if (cartItems.length === 0) {
+        alert('Tabel item masih kosong!');
+        return;
+    }
 
-            const namaPelanggan = masterPelanggan[pelangganIdx].nama;
-            const kodePelanggan = document.getElementById('kodePelanggan').value;
-            const tgl = document.getElementById('tglTransaksi').value;
-            const diskonTambahan = parseFloat(document.getElementById('inputDiskonTambahan').value) || 0;
+    const namaPelanggan = masterPelanggan[pelangganIdx].nama;
+    const kodePelanggan = document.getElementById('kodePelanggan').value;
+    const tgl = document.getElementById('tglTransaksi').value;
+    const diskonTambahan = parseFloat(document.getElementById('inputDiskonTambahan').value) || 0;
+    
+    const payload = {
+        namaPelanggan: namaPelanggan,
+        kodePelanggan: kodePelanggan,
+        tanggal: tgl,
+        diskonTambahan: diskonTambahan,
+        items: cartItems
+    };
+
+    const submitBtn = document.getElementById('btnSubmitResume');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Spreadsheet...';
+
+    // Encode payload untuk dikirimkan melalui GET agar terhindar dari CORS blokir POST
+    const targetUrl = `${DEFAULT_APP_URL}?action=submitFakturData&data=${encodeURIComponent(JSON.stringify(payload))}`;
+
+    fetch(targetUrl, {
+        method: 'GET',
+        redirect: 'follow'
+    })
+    .then(res => res.json())
+    .then(res => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
+
+        if (res.status === 'success') {
+            currentKodeUnik = res.kodeUnik;
+            alert(`Berhasil Submit ke Spreadsheet! Kode Unik: ${res.kodeUnik}`);
             
-            const payload = {
-                namaPelanggan: namaPelanggan,
-                kodePelanggan: kodePelanggan,
-                tanggal: tgl,
-                diskonTambahan: diskonTambahan,
-                items: cartItems
-            };
-
-            const submitBtn = document.getElementById('btnSubmitResume');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Spreadsheet...';
-
-            fetch(`${DEFAULT_APP_URL}?action=submitFakturData&data=${encodeURIComponent(JSON.stringify(payload))}`)
-                .then(res => res.json())
-                .then(res => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
-
-                    if(res.status === 'success') {
-                        currentKodeUnik = res.kodeUnik;
-                        alert(`Berhasil Submit ke Spreadsheet! Unique Code: ${res.kodeUnik}`);
-                        
-                        prepareResumeTab(namaPelanggan, kodePelanggan, tgl, diskonTambahan, res.kodeUnik);
-                        switchTab(2);
-                    } else {
-                        alert('Gagal submit data: ' + res.message);
-                    }
-                })
-                .catch(err => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
-                    console.error(err);
-                    alert('Terjadi kesalahan koneksi.');
-                });
+            prepareResumeTab(namaPelanggan, kodePelanggan, tgl, diskonTambahan, res.kodeUnik);
+            switchTab(2);
+        } else {
+            alert('Gagal submit data: ' + res.message);
         }
+    })
+    .catch(err => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
+        console.error(err);
+        alert('Terjadi kesalahan koneksi. Pastikan Web App Apps Script sudah dideploy ulang ke "Anyone".');
+    });
+}
 
         function prepareResumeTab(namaPelanggan, kodePelanggan, tgl, diskonTambahan, kodeUnik) {
             document.getElementById('pdfKodeUnik').innerText = kodeUnik;
