@@ -313,8 +313,8 @@
                         <span id="lblPPN" class="font-semibold text-emerald-600">+ Rp 0</span>
                     </div>
                     <div class="flex justify-between text-xs sm:text-sm">
-                        <span class="text-slate-500">PPh (-):</span>
-                        <span id="lblPPh" class="font-semibold text-rose-500">- Rp 0</span>
+                        <span class="text-slate-500">PPh (+):</span>
+                        <span id="lblPPh" class="font-semibold text-emerald-600">+ Rp 0</span>
                     </div>
                     <hr class="border-slate-200 my-1">
                     <div class="flex justify-between text-sm sm:text-base font-bold text-slate-900 pt-1">
@@ -355,7 +355,7 @@
             <div id="invoiceArea" class="invoice-paper p-6 sm:p-8 rounded-2xl mx-auto text-slate-800">
                 <div class="flex justify-between items-center border-b-2 border-slate-800 pb-4 mb-5">
                     <div class="flex items-center gap-4">
-                        <img src="https://lh3.googleusercontent.com/d/1GAPrkrsiup-gN5qlU4XcUlmkDuz1tDDj" alt="Logo Bengkel" class="w-16 h-16 object-contain shrink-0">
+                        <img src="https://lh3.googleusercontent.com/d/1haUF2pUtkyxZoI4sKbBCtvhcBZrttkIl" alt="Logo Bengkel" class="w-16 h-16 object-contain shrink-0">
                         <div>
                             <h2 class="text-xl font-extrabold text-blue-950 uppercase tracking-tight">BANG SURYA AC</h2>
                             <p class="text-[11px] text-slate-600 font-medium leading-tight mt-0.5">
@@ -427,7 +427,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-slate-600 font-medium">PPh:</span>
-                            <span class="text-rose-600 font-semibold" id="pdfPPh">- Rp 0</span>
+                            <span class="text-emerald-600 font-semibold" id="pdfPPh">+ Rp 0</span>
                         </div>
                         <hr class="border-slate-200 my-1">
                         <div class="flex justify-between text-xs font-bold text-slate-900 pt-0.5">
@@ -647,7 +647,7 @@
             const total = (harga * qty) - diskon;
 
             cartItems.push({
-                kodeBarang: barang.kode || '', // Mengambil Kolom A dari sheet "OPERATOR BARANG"
+                kodeBarang: barang.kode || '', 
                 namaBarang: barang.nama,
                 satuan: barang.satuan,
                 harga: harga,
@@ -723,12 +723,12 @@
             const nominalPPN = parseFloat(document.getElementById('inputPPN').value) || 0;
             const nominalPPh = parseFloat(document.getElementById('inputPPh').value) || 0;
 
-            const grandTotal = (sumGross - diskonTambahan) + nominalPPN - nominalPPh;
+            const grandTotal = (sumGross - diskonTambahan) + nominalPPN + nominalPPh;
 
             document.getElementById('lblTotalGross').innerText = formatRupiah(sumGross);
             document.getElementById('lblDiskonTambahan').innerText = "- " + formatRupiah(diskonTambahan);
             document.getElementById('lblPPN').innerText = "+ " + formatRupiah(nominalPPN);
-            document.getElementById('lblPPh').innerText = "- " + formatRupiah(nominalPPh);
+            document.getElementById('lblPPh').innerText = "+ " + formatRupiah(nominalPPh);
             document.getElementById('lblGrandTotal').innerText = formatRupiah(grandTotal < 0 ? 0 : grandTotal);
         }
 
@@ -769,7 +769,7 @@
                 ppn: nominalPPN,       
                 pph: nominalPPh,       
                 admin: extraData.admin,
-                items: cartItems // Mengirimkan objek termasuk kodeBarang untuk dicatat ke Kolom P sheet PENJUALAN
+                items: cartItems 
             };
 
             const submitBtn = document.getElementById('btnSubmitResume');
@@ -838,12 +838,12 @@
                 `;
             });
 
-            const grandTotal = (sumGross - diskonTambahan) + ppnVal - pphVal;
+            const grandTotal = (sumGross - diskonTambahan) + ppnVal + pphVal;
 
             document.getElementById('pdfSubtotal').innerText = formatRupiah(sumGross);
             document.getElementById('pdfDiskonTambahan').innerText = "- " + formatRupiah(diskonTambahan);
             document.getElementById('pdfPPN').innerText = "+ " + formatRupiah(ppnVal);
-            document.getElementById('pdfPPh').innerText = "- " + formatRupiah(pphVal);
+            document.getElementById('pdfPPh').innerText = "+ " + formatRupiah(ppphVal || pphVal);
             document.getElementById('pdfGrandTotal').innerText = formatRupiah(grandTotal < 0 ? 0 : grandTotal);
         }
 
