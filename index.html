@@ -386,7 +386,6 @@
                         <p class="text-slate-600">Nopol: <span id="pdfNopol" class="font-bold text-slate-800">-</span></p>
                         <p class="text-slate-600">Jenis Kendaraan: <span id="pdfJenisKendaraan" class="font-medium text-slate-800">-</span></p>
                         <p class="text-slate-600">Kilometer Awal: <span id="pdfKmServis" class="font-medium text-slate-800">-</span></p>
-                    
                     </div>
                 </div>
 
@@ -536,14 +535,10 @@
         function selectPelangganItem(idx) {
             const p = masterPelanggan[idx];
 
-            // 1. Nama Pelanggan (Kolom C)
             document.getElementById('searchPelanggan').value = p.nama || '';
             document.getElementById('selectPelanggan').value = idx;
-            
-            // 2. Kode Pelanggan (Kolom A)
             document.getElementById('kodePelanggan').value = p.kode || '-';
 
-            // 3. Tanggal Faktur (Kolom B)
             if (p.tglFaktur) {
                 try {
                     const formattedDate = new Date(p.tglFaktur).toISOString().split('T')[0];
@@ -553,13 +548,12 @@
                 }
             }
 
-            // 4. Pemetaan Otomatis ke Field Input Tambahan
-            document.getElementById('pelangganTelepon').value = p.telepon || '-';        // Kolom E (NO HP)
-            document.getElementById('pelangganAlamat').value = p.alamat || '-';          // Kolom F (ALAMAT)
-            document.getElementById('pelangganNopol').value = p.nopol || '-';            // Kolom G (NOPOL)
-            document.getElementById('pelangganJenisKendaraan').value = p.jenisKendaraan || '-'; // Kolom H (JENIS KENDARAAN)
-            document.getElementById('pelangganKmServis').value = p.kmServis || '-';      // Kolom I (KM AWAL)
-            document.getElementById('pelangganAdmin').value = p.admin || '-';            // Kolom K (ADMIN)
+            document.getElementById('pelangganTelepon').value = p.telepon || '-';        
+            document.getElementById('pelangganAlamat').value = p.alamat || '-';          
+            document.getElementById('pelangganNopol').value = p.nopol || '-';            
+            document.getElementById('pelangganJenisKendaraan').value = p.jenisKendaraan || '-'; 
+            document.getElementById('pelangganKmServis').value = p.kmServis || '-';      
+            document.getElementById('pelangganAdmin').value = p.admin || '-';            
 
             document.getElementById('suggestPelangganBox').classList.add('hidden');
         }
@@ -653,6 +647,7 @@
             const total = (harga * qty) - diskon;
 
             cartItems.push({
+                kodeBarang: barang.kode || '', // Mengambil Kolom A dari sheet "OPERATOR BARANG"
                 namaBarang: barang.nama,
                 satuan: barang.satuan,
                 harga: harga,
@@ -672,6 +667,10 @@
 
             renderCartTable();
             calculateGrandTotal();
+        }
+
+        function updateItemName(index, newName) {
+            cartItems[index].namaBarang = newName;
         }
 
         function removeItem(idx) {
@@ -700,7 +699,9 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3.5 text-center font-medium text-slate-400">${index + 1}</td>
-                        <td class="px-4 py-3.5 font-semibold text-slate-800">${item.namaBarang}</td>
+                        <td class="px-4 py-3.5">
+                            <input type="text" value="${item.namaBarang}" oninput="updateItemName(${index}, this.value)" class="custom-input w-full p-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800">
+                        </td>
                         <td class="px-4 py-3.5 text-center font-medium text-slate-600">${item.satuan}</td>
                         <td class="px-4 py-3.5 text-right font-medium text-slate-700">${formatRupiah(item.harga)}</td>
                         <td class="px-4 py-3.5 text-center font-bold text-slate-900">${item.qty}</td>
@@ -768,7 +769,7 @@
                 ppn: nominalPPN,       
                 pph: nominalPPh,       
                 admin: extraData.admin,
-                items: cartItems
+                items: cartItems // Mengirimkan objek termasuk kodeBarang untuk dicatat ke Kolom P sheet PENJUALAN
             };
 
             const submitBtn = document.getElementById('btnSubmitResume');
@@ -815,7 +816,6 @@
             document.getElementById('pdfNopol').innerText = extra.nopol || '-';
             document.getElementById('pdfJenisKendaraan').innerText = extra.jenisKendaraan || '-';
             document.getElementById('pdfKmServis').innerText = extra.kmServis || '-';
-            document.getElementById('pdfAdmin').innerText = extra.admin || '-';
             document.getElementById('pdfSignAdmin').innerText = extra.admin ? `( ${extra.admin} )` : '( Admin )';
             document.getElementById('pdfCatatan').innerText = catatan || '-';
 
