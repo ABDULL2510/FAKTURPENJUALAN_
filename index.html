@@ -566,22 +566,25 @@
            p.kmServis        <- Column J (index 9)
            p.admin           <- Column K (index 10)
         */
-        function selectPelangganItem(idx) {
-            const p = masterPelanggan[idx];
-            document.getElementById('searchPelanggan').value = p.nama;
-            document.getElementById('selectPelanggan').value = idx;
-            document.getElementById('kodePelanggan').value = p.kode || '-';
+       function selectPelangganItem(idx) {
+    const p = masterPelanggan[idx];
 
-            // Mapping otomatis ke input field
-            document.getElementById('pelangganNopol').value = p.nopol || '-';           
-            document.getElementById('pelangganJenisKendaraan').value = p.jenisKendaraan || '-'; 
-            document.getElementById('pelangganAlamat').value = p.alamat || '-';         
-            document.getElementById('pelangganTelepon').value = p.telepon || '-';       
-            document.getElementById('pelangganKmServis').value = p.kmServis || '-';     
-            document.getElementById('pelangganAdmin').value = p.admin || '-';           
+    // Input Utama & Hidden Value
+    document.getElementById('searchPelanggan').value = p.nama || '';
+    document.getElementById('selectPelanggan').value = idx;
+    document.getElementById('kodePelanggan').value = p.kode || '-';
 
-            document.getElementById('suggestPelangganBox').classList.add('hidden');
-        }
+    // Pemetaan Otomatis ke Field Tambahan Pelanggan
+    document.getElementById('pelangganTelepon').value = p.telepon || '-';        // Index 5 (Kolom F)
+    document.getElementById('pelangganAlamat').value = p.alamat || '-';          // Index 6 (Kolom G)
+    document.getElementById('pelangganNopol').value = p.nopol || '-';            // Index 7 (Kolom H)
+    document.getElementById('pelangganJenisKendaraan').value = p.jenisKendaraan || '-'; // Index 8 (Kolom I)
+    document.getElementById('pelangganKmServis').value = p.kmServis || '-';      // Index 9 (Kolom J)
+    document.getElementById('pelangganAdmin').value = p.admin || '-';            // Index 10 (Kolom K)
+
+    // Sembunyikan Dropdown Suggestion
+    document.getElementById('suggestPelangganBox').classList.add('hidden');
+}
 
         function resetPelangganFields() {
             document.getElementById('pelangganNopol').value = '';
