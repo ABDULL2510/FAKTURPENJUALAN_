@@ -20,7 +20,6 @@
             color: #0f172a;
         }
 
-        /* Modern Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -36,17 +35,14 @@
             background: #94a3b8;
         }
 
-        /* Subtle Glassmorphism Header */
         .glass-header { 
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
         }
 
-        /* Glass Cards & Shadows */
         .card-shadow {
             box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
         }
 
-        /* Custom Input Focus Glows */
         .custom-input {
             transition: all 0.15s ease-in-out;
             background-color: #ffffff;
@@ -58,7 +54,6 @@
             outline: none;
         }
 
-        /* Invoice Paper Style for Tab 2 */
         .invoice-paper {
             background: #ffffff;
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
@@ -73,12 +68,8 @@
 
     <!-- Header Navigation -->
     <header class="glass-header text-white shadow-md relative overflow-hidden">
-        <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
             <div class="flex items-center gap-3.5">
-                <!-- LOGO WEB GOOGLE DRIVE -->
                 <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 p-1 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
                     <img src="https://lh3.googleusercontent.com/d/1GAPrkrsiup-gN5qlU4XcUlmkDuz1tDDj" alt="Logo Web" class="w-full h-full object-contain">
                 </div>
@@ -110,7 +101,7 @@
             </button>
         </div>
 
-        <!-- ==================== TAB 1: FORM INPUT ==================== -->
+        <!-- TAB 1: FORM INPUT -->
         <div id="tab1" class="bg-white rounded-2xl card-shadow border border-slate-200/80 p-5 sm:p-7 space-y-6">
 
             <!-- INFORMASI PELANGGAN & TANGGAL -->
@@ -125,27 +116,26 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- NAMA PELANGGAN WITH AUTO-SUGGEST (KOLOM D / Index 3) -->
+                    <!-- NAMA PELANGGAN (KOLOM C) -->
                     <div class="relative">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Pelanggan (Kolom D)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Pelanggan (Kolom C)</label>
                         <div class="relative">
                             <input type="text" id="searchPelanggan" oninput="filterPelangganSuggest()" onfocus="filterPelangganSuggest()" placeholder="Cari / Ketik Nama Pelanggan..." autocomplete="off" class="custom-input w-full p-2.5 pr-8 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700">
                             <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs pointer-events-none"></i>
                         </div>
                         <input type="hidden" id="selectPelanggan" value="">
-                        <!-- Dropdown Suggestion Box -->
                         <div id="suggestPelangganBox" class="hidden absolute z-30 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100"></div>
                     </div>
 
-                    <!-- KODE PELANGGAN (KOLOM B / Index 1) -->
+                    <!-- KODE PELANGGAN (KOLOM A) -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kode Pelanggan (Kolom B)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kode Pelanggan (Kolom A)</label>
                         <input type="text" id="kodePelanggan" readonly placeholder="Otomatis terisi..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono text-slate-700 font-semibold cursor-not-allowed">
                     </div>
 
-                    <!-- TANGGAL TRANSAKSI -->
+                    <!-- TANGGAL TRANSAKSI (KOLOM B) -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Transaksi</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Faktur (Kolom B)</label>
                         <input type="date" id="tglTransaksi" class="custom-input w-full p-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700">
                     </div>
                 </div>
@@ -153,23 +143,23 @@
                 <!-- FIELD OTOMATIS TAMBAHAN DARI DATA PELANGGAN -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-2 border-t border-slate-200/60">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nopol (Kolom H)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nopol (Kolom G)</label>
                         <input type="text" id="pelangganNopol" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 font-semibold cursor-not-allowed">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Jenis Kendaraan (Kolom I)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Jenis Kendaraan (Kolom H)</label>
                         <input type="text" id="pelangganJenisKendaraan" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 cursor-not-allowed">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Alamat (Kolom G)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Alamat (Kolom F)</label>
                         <input type="text" id="pelangganAlamat" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 cursor-not-allowed">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. Telepon (Kolom F)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. HP (Kolom E)</label>
                         <input type="text" id="pelangganTelepon" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 cursor-not-allowed">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">KM Servis (Kolom J)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">KM Awal (Kolom I)</label>
                         <input type="text" id="pelangganKmServis" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 cursor-not-allowed">
                     </div>
                     <div>
@@ -194,7 +184,7 @@
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3.5 items-end">
                     <div class="sm:col-span-2 md:col-span-2 relative">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Barang (Operator Barang Kolom B)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Barang (Operator Barang)</label>
                         <div class="relative">
                             <input type="text" id="searchBarang" oninput="filterBarangSuggest()" onfocus="filterBarangSuggest()" placeholder="Cari / Ketik Barang..." autocomplete="off" class="custom-input w-full p-2.5 pr-8 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700">
                             <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs pointer-events-none"></i>
@@ -242,7 +232,7 @@
             <div class="space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-blue-600"></i> Tabel Koleksi Sementara (Belum Disubmit)
+                        <i class="fa-solid fa-list-check text-blue-600"></i> Tabel Koleksi Sementara
                     </h3>
                 </div>
                 <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm bg-white">
@@ -272,18 +262,16 @@
                     </table>
                 </div>
 
-                <!-- CATATAN (DISIMPAN KE KOLOM J) -->
                 <div class="pt-2">
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                        <i class="fa-solid fa-note-sticky text-amber-500"></i> CATATAN (DISIMPAN KE KOLOM J)
+                        <i class="fa-solid fa-note-sticky text-amber-500"></i> CATATAN TRANSAKSI
                     </label>
                     <textarea id="inputCatatan" rows="2" placeholder="Masukkan catatan tambahan untuk transaksi ini..." class="custom-input w-full p-2.5 border border-slate-300 rounded-xl text-xs text-slate-700"></textarea>
                 </div>
             </div>
 
-            <!-- SUMMARY RINGKASAN & DISKON TAMBAHAN, PPN (RP), PPH (RP) -->
+            <!-- SUMMARY RINGKASAN -->
             <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/90 flex flex-col md:flex-row justify-between gap-6">
-                <!-- FORM DISKON, PPN, PPH -->
                 <div class="w-full md:w-1/2 space-y-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Diskon Tambahan Faktur (Rp)</label>
@@ -293,28 +281,24 @@
                         </div>
                     </div>
 
-                    <!-- PPN (KOLOM L) & PPH (KOLOM M) -->
                     <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-200/60">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPN (Rp) [Kolom L]</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPN (Rp)</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-medium">Rp</span>
                                 <input type="number" id="inputPPN" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPh (Rp) [Kolom M]</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPh (Rp)</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-medium">Rp</span>
                                 <input type="number" id="inputPPh" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
                             </div>
                         </div>
                     </div>
-
-                    <p class="text-[11px] text-slate-500 italic">*PPN menambah Grand Total (+), PPh mengurangi Grand Total (-).</p>
                 </div>
 
-                <!-- RINGKASAN SUB-TOTAL & GRAND TOTAL -->
                 <div class="w-full md:w-1/2 bg-white p-4 sm:p-5 rounded-xl border border-slate-200/90 space-y-2 shadow-sm">
                     <div class="flex justify-between text-xs sm:text-sm">
                         <span class="text-slate-500">Total Kotor (Sum Item):</span>
@@ -340,7 +324,7 @@
                 </div>
             </div>
 
-            <!-- ACTION SUBMIT RESUME -->
+            <!-- ACTION SUBMIT -->
             <div class="flex justify-end pt-2">
                 <button id="btnSubmitResume" onclick="submitToSpreadsheet()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white px-8 py-3.5 rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 transition-all duration-200 flex items-center justify-center gap-2.5">
                     <i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2
@@ -349,7 +333,7 @@
 
         </div>
 
-        <!-- ==================== TAB 2: RESUME & GENERATE PDF ==================== -->
+        <!-- TAB 2: RESUME & GENERATE PDF -->
         <div id="tab2" class="bg-white rounded-2xl card-shadow border border-slate-200/80 p-5 sm:p-7 hidden space-y-6">
             
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
@@ -367,19 +351,16 @@
                 </div>
             </div>
 
-            <!-- FAKTUR PENJUALAN (Cetak/PDF) -->
+            <!-- FAKTUR PENJUALAN PAPER -->
             <div id="invoiceArea" class="invoice-paper p-6 sm:p-8 rounded-2xl mx-auto text-slate-800">
-                
-                <!-- KOP BENGKEL / HEADER PERUSAHAAN -->
                 <div class="flex justify-between items-center border-b-2 border-slate-800 pb-4 mb-5">
                     <div class="flex items-center gap-4">
                         <img src="https://lh3.googleusercontent.com/d/1GAPrkrsiup-gN5qlU4XcUlmkDuz1tDDj" alt="Logo Bengkel" class="w-16 h-16 object-contain shrink-0">
-                        
                         <div>
                             <h2 class="text-xl font-extrabold text-blue-950 uppercase tracking-tight">BENGKEL SEJAHTERA MOTOR</h2>
                             <p class="text-[11px] text-slate-600 font-medium leading-tight mt-0.5">
                                 Jl. Raya Otomotif No. 123, Komplek Industri, Jakarta Pusat<br>
-                                <span class="font-semibold text-slate-700"><i class="fa-solid fa-phone text-[10px] mr-1"></i> Telp/WA: 0812-3456-7890 / (021) 555-0199</span>
+                                <span class="font-semibold text-slate-700"><i class="fa-solid fa-phone text-[10px] mr-1"></i> Telp/WA: 0812-3456-7890</span>
                             </p>
                         </div>
                     </div>
@@ -392,25 +373,23 @@
                     </div>
                 </div>
 
-                <!-- Detail Pelanggan & Kendaraan -->
                 <div class="grid grid-cols-2 gap-4 mb-5 text-[11px]">
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1">
                         <p class="text-slate-500 font-semibold mb-1 uppercase tracking-wider text-[9px]">Kepada Yth:</p>
                         <p class="text-xs font-bold text-slate-900" id="pdfNamaPelanggan">-</p>
                         <p class="text-slate-600">Kode Pelanggan: <span id="pdfKodePelanggan" class="font-mono font-semibold text-slate-800">-</span></p>
                         <p class="text-slate-600">Alamat: <span id="pdfAlamat" class="font-medium text-slate-800">-</span></p>
-                        <p class="text-slate-600">No. Telp: <span id="pdfTelepon" class="font-medium text-slate-800">-</span></p>
+                        <p class="text-slate-600">No. HP: <span id="pdfTelepon" class="font-medium text-slate-800">-</span></p>
                     </div>
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1 text-right">
                         <p class="text-slate-500 font-semibold mb-1 uppercase tracking-wider text-[9px]">Info Kendaraan & Admin:</p>
                         <p class="text-slate-600">Nopol: <span id="pdfNopol" class="font-bold text-slate-800">-</span></p>
                         <p class="text-slate-600">Jenis Kendaraan: <span id="pdfJenisKendaraan" class="font-medium text-slate-800">-</span></p>
-                        <p class="text-slate-600">KM Servis: <span id="pdfKmServis" class="font-medium text-slate-800">-</span></p>
+                        <p class="text-slate-600">KM Awal: <span id="pdfKmServis" class="font-medium text-slate-800">-</span></p>
                         <p class="text-slate-600">Admin: <span id="pdfAdmin" class="font-semibold text-slate-800">-</span></p>
                     </div>
                 </div>
 
-                <!-- Tabel Item -->
                 <div class="overflow-x-auto mb-4">
                     <table class="w-full text-[11px] text-left text-slate-700 border-collapse">
                         <thead>
@@ -428,7 +407,6 @@
                     </table>
                 </div>
 
-                <!-- Summary Total & Catatan PDF -->
                 <div class="grid grid-cols-2 gap-4 items-start mb-6">
                     <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-[11px]">
                         <p class="font-bold text-slate-700">Catatan / Keterangan:</p>
@@ -460,7 +438,6 @@
                     </div>
                 </div>
 
-                <!-- Tanda Tangan -->
                 <div class="grid grid-cols-2 gap-8 text-center text-[11px] text-slate-600 pt-2">
                     <div>
                         <p class="mb-10 font-medium">Penerima / Pelanggan,</p>
@@ -477,7 +454,7 @@
 
     </main>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- LOGIKA JAVASCRIPT -->
     <script>
         const DEFAULT_APP_URL = "https://script.google.com/macros/s/AKfycbxV0m51ESAbUafcpDne9_et-H6Ad6xstqi6M2IMfCrnexo5-SqxzW6fLyrK6IlV9UHL/exec";
         const DRIVE_FOLDER_ID = "1g-Q0vLrEqoXycbrEU9fREkYlWowyD24q";
@@ -526,7 +503,7 @@
                 });
         }
 
-        // --- SUGGEST LOGIC: PELANGGAN ---
+        // --- FILTER SUGGEST PELANGGAN (FILTER BY NAMA - KOLOM C) ---
         function filterPelangganSuggest() {
             const input = document.getElementById('searchPelanggan').value.toLowerCase();
             const box = document.getElementById('suggestPelangganBox');
@@ -537,7 +514,7 @@
                 resetPelangganFields();
             }
 
-            const filtered = masterPelanggan.filter(p => p.nama && p.nama.toLowerCase().includes(input));
+            const filtered = masterPelanggan.filter(p => p.nama && String(p.nama).toLowerCase().includes(input));
 
             if(filtered.length === 0) {
                 box.innerHTML = `<div class="p-3 text-xs text-slate-400 italic">Data pelanggan tidak ditemukan</div>`;
@@ -547,7 +524,7 @@
                     return `
                         <div onclick="selectPelangganItem(${originalIndex})" class="p-2.5 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors flex justify-between items-center">
                             <span class="font-medium">${p.nama}</span>
-                            <span class="text-[10px] text-slate-500 font-mono bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">Kode B: ${p.kode || '-'}</span>
+                            <span class="text-[10px] text-slate-500 font-mono bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">Kode: ${p.kode || '-'}</span>
                         </div>
                     `;
                 }).join('');
@@ -555,46 +532,37 @@
             box.classList.remove('hidden');
         }
 
-        /*
-           MAPPING DIPASTIKAN PRESISI SESUAI BAGIAN C (doGet):
-           p.kode            <- Column B (index 1)
-           p.nama            <- Column D (index 3)
-           p.telepon         <- Column F (index 5)
-           p.alamat          <- Column G (index 6)
-           p.nopol           <- Column H (index 7)
-           p.jenisKendaraan  <- Column I (index 8)
-           p.kmServis        <- Column J (index 9)
-           p.admin           <- Column K (index 10)
-        */
-      // --- PEMETAAN TEPAT PRESISI DENGAN SCREENSHOT SPREADSHEET ---
-function selectPelangganItem(idx) {
-    const p = masterPelanggan[idx];
+        // --- PEMETAAN TEPAT PRESISI DENGAN SPREADSHEET ---
+        function selectPelangganItem(idx) {
+            const p = masterPelanggan[idx];
 
-    // 1. Nama Pelanggan (Kolom C / Index 2)
-    document.getElementById('searchPelanggan').value = p.nama || '';
-    document.getElementById('selectPelanggan').value = idx;
-    
-    // 2. Kode Pelanggan (Kolom A / Index 0)
-    document.getElementById('kodePelanggan').value = p.kode || '-';
+            // 1. Nama Pelanggan (Kolom C)
+            document.getElementById('searchPelanggan').value = p.nama || '';
+            document.getElementById('selectPelanggan').value = idx;
+            
+            // 2. Kode Pelanggan (Kolom A)
+            document.getElementById('kodePelanggan').value = p.kode || '-';
 
-    // 3. Tanggal Transaksi/Faktur (Kolom B / Index 1)
-    if (p.tglFaktur) {
-        // Mengubah format ISO Date ke format YYYY-MM-DD untuk input type date
-        const formattedDate = new Date(p.tglFaktur).toISOString().split('T')[0];
-        document.getElementById('tglTransaksi').value = formattedDate;
-    }
+            // 3. Tanggal Faktur (Kolom B)
+            if (p.tglFaktur) {
+                try {
+                    const formattedDate = new Date(p.tglFaktur).toISOString().split('T')[0];
+                    document.getElementById('tglTransaksi').value = formattedDate;
+                } catch(e) {
+                    console.log("Format tanggal dari sheet:", p.tglFaktur);
+                }
+            }
 
-    // 4. Pemetaan Otomatis ke Field Input Tambahan
-    document.getElementById('pelangganTelepon').value = p.telepon || '-';        // Kolom E (Index 4)
-    document.getElementById('pelangganAlamat').value = p.alamat || '-';          // Kolom F (Index 5)
-    document.getElementById('pelangganNopol').value = p.nopol || '-';            // Kolom G (Index 6)
-    document.getElementById('pelangganJenisKendaraan').value = p.jenisKendaraan || '-'; // Kolom H (Index 7)
-    document.getElementById('pelangganKmServis').value = p.kmServis || '-';      // Kolom I (Index 8)
-    document.getElementById('pelangganAdmin').value = p.admin || '-';            // Kolom K (Index 10)
+            // 4. Pemetaan Otomatis ke Field Input Tambahan
+            document.getElementById('pelangganTelepon').value = p.telepon || '-';        // Kolom E (NO HP)
+            document.getElementById('pelangganAlamat').value = p.alamat || '-';          // Kolom F (ALAMAT)
+            document.getElementById('pelangganNopol').value = p.nopol || '-';            // Kolom G (NOPOL)
+            document.getElementById('pelangganJenisKendaraan').value = p.jenisKendaraan || '-'; // Kolom H (JENIS KENDARAAN)
+            document.getElementById('pelangganKmServis').value = p.kmServis || '-';      // Kolom I (KM AWAL)
+            document.getElementById('pelangganAdmin').value = p.admin || '-';            // Kolom K (ADMIN)
 
-    // Sembunyikan Dropdown Suggestion
-    document.getElementById('suggestPelangganBox').classList.add('hidden');
-}
+            document.getElementById('suggestPelangganBox').classList.add('hidden');
+        }
 
         function resetPelangganFields() {
             document.getElementById('pelangganNopol').value = '';
@@ -615,7 +583,7 @@ function selectPelangganItem(idx) {
                 onBarangChange();
             }
 
-            const filtered = masterBarang.filter(b => b.nama && b.nama.toLowerCase().includes(input));
+            const filtered = masterBarang.filter(b => b.nama && String(b.nama).toLowerCase().includes(input));
 
             if(filtered.length === 0) {
                 box.innerHTML = `<div class="p-3 text-xs text-slate-400 italic">Data barang tidak ditemukan</div>`;
