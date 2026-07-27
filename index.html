@@ -3,878 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Input Faktur Penjualan</title>
+    <title>Sistem Kasir & Cetak Faktur</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- html2pdf.js untuk Generate PDF -->
+    <!-- html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        
-        body { 
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: #f8fafc;
-            color: #0f172a;
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
         }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .glass-header { 
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
-        }
-
-        .card-shadow {
-            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-        }
-
-        .custom-input {
-            transition: all 0.15s ease-in-out;
-            background-color: #ffffff;
-        }
-        .custom-input:focus {
-            background-color: #ffffff;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
-            outline: none;
-        }
-
-        .invoice-paper {
-            background: #ffffff;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
-            border: 1px solid #e2e8f0;
-            width: 100%;
-            max-width: 800px;
-            box-sizing: border-box;
+        .invoice-box {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
+            line-height: 24px;
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            color: #555;
         }
     </style>
 </head>
-<body class="min-h-screen pb-16 bg-slate-50 text-slate-800">
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
 
-    <!-- Header Navigation -->
-    <header class="glass-header text-white shadow-md relative overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-            <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 p-1 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
-                    <img src="https://lh3.googleusercontent.com/d/1GAPrkrsiup-gN5qlU4XcUlmkDuz1tDDj" alt="Logo Web" class="w-full h-full object-contain">
-                </div>
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                        Input Faktur Penjualan
-                    </h1>
-                    <p class="text-slate-300 text-xs font-medium mt-0.5">Sistem Otomatisasi & Manajemen Transaksi Penjualan</p>
-                </div>
-            </div>
-            <div>
-                <button onclick="loadInitialData()" class="w-full sm:w-auto bg-white/10 hover:bg-white/20 active:bg-white/25 text-white border border-white/15 px-4 py-2.5 rounded-xl text-xs font-semibold backdrop-blur-md transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-rotate text-blue-300" id="refreshIcon"></i> Refresh Master Data
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <!-- Control Bar / Action Buttons -->
+        <div class="no-print mb-6 flex flex-wrap justify-between items-center gap-4 border-b pb-4">
+            <h1 class="text-2xl font-bold text-gray-800">Preview Faktur Penjualan</h1>
+            <div class="flex gap-2">
+                <button id="btnDownloadPDF" onclick="downloadPDF()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive
                 </button>
             </div>
         </div>
-    </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
-
-        <!-- TAB NAVIGATION -->
-        <div class="flex bg-slate-200/70 p-1.5 rounded-2xl gap-1.5 max-w-2xl mx-auto mb-6 shadow-inner border border-slate-300/50">
-            <button id="tabBtn1" onclick="switchTab(1)" class="flex-1 py-2.5 px-5 text-center font-semibold text-blue-600 bg-white rounded-xl shadow-sm focus:outline-none transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm">
-                <i class="fa-solid fa-pen-to-square"></i> 1. Form Input Transaksi
-            </button>
-            <button id="tabBtn2" onclick="switchTab(2)" class="flex-1 py-2.5 px-5 text-center font-semibold text-slate-600 hover:text-slate-900 rounded-xl focus:outline-none transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm">
-                <i class="fa-solid fa-file-pdf"></i> 2. Resume & Generate PDF
-            </button>
-        </div>
-
-        <!-- TAB 1: FORM INPUT -->
-        <div id="tab1" class="bg-white rounded-2xl card-shadow border border-slate-200/80 p-5 sm:p-7 space-y-6">
-
-            <!-- INFORMASI PELANGGAN & TANGGAL -->
-            <div class="bg-slate-50/80 p-5 rounded-2xl border border-slate-200/90 space-y-4">
-                <div class="flex items-center gap-2 border-b border-slate-200/80 pb-3">
-                    <div class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 text-xs">
-                        <i class="fa-solid fa-user-tag"></i>
-                    </div>
-                    <h2 class="text-sm font-bold text-slate-800 tracking-wide uppercase">
-                        Informasi Pelanggan & Transaksi
-                    </h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- NAMA PELANGGAN (KOLOM C) -->
-                    <div class="relative">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Pelanggan (Kolom C)</label>
-                        <div class="relative">
-                            <input type="text" id="searchPelanggan" oninput="filterPelangganSuggest()" onfocus="filterPelangganSuggest()" placeholder="Cari / Ketik Nama Pelanggan..." autocomplete="off" class="custom-input w-full p-2.5 pr-8 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700">
-                            <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs pointer-events-none"></i>
-                        </div>
-                        <input type="hidden" id="selectPelanggan" value="">
-                        <div id="suggestPelangganBox" class="hidden absolute z-30 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100"></div>
-                    </div>
-
-                    <!-- KODE PELANGGAN (KOLOM A) -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kode Pelanggan (Kolom A)</label>
-                        <input type="text" id="kodePelanggan" readonly placeholder="Otomatis terisi..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono text-slate-700 font-semibold cursor-not-allowed">
-                    </div>
-
-                    <!-- TANGGAL TRANSAKSI (KOLOM B) -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Faktur (Kolom B)</label>
-                        <input type="date" id="tglTransaksi" class="custom-input w-full p-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700">
-                    </div>
-                </div>
-
-                <!-- FIELD OTOMATIS TAMBAHAN DARI DATA PELANGGAN -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-2 border-t border-slate-200/60">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nopol (Kolom G)</label>
-                        <input type="text" id="pelangganNopol" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 font-semibold cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Jenis Kendaraan (Kolom H)</label>
-                        <input type="text" id="pelangganJenisKendaraan" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Alamat (Kolom F)</label>
-                        <input type="text" id="pelangganAlamat" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. HP (Kolom E)</label>
-                        <input type="text" id="pelangganTelepon" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">KM Awal (Kolom I)</label>
-                        <input type="text" id="pelangganKmServis" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Admin (Kolom K)</label>
-                        <input type="text" id="pelangganAdmin" readonly placeholder="Otomatis..." class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs text-slate-700 font-semibold cursor-not-allowed">
-                    </div>
-                </div>
-            </div>
-
-            <!-- FORM INPUT ITEM BARANG -->
-            <div class="bg-gradient-to-br from-blue-50/70 via-slate-50 to-indigo-50/50 p-5 rounded-2xl border border-blue-100/80 space-y-4">
-                <div class="flex items-center justify-between border-b border-blue-100 pb-3">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs shadow-sm">
-                            <i class="fa-solid fa-cart-plus"></i>
-                        </div>
-                        <h2 class="text-sm font-bold text-slate-800 tracking-wide uppercase">
-                            Input Item Barang
-                        </h2>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3.5 items-end">
-                    <div class="sm:col-span-2 md:col-span-2 relative">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Barang (Operator Barang)</label>
-                        <div class="relative">
-                            <input type="text" id="searchBarang" oninput="filterBarangSuggest()" onfocus="filterBarangSuggest()" placeholder="Cari / Ketik Barang..." autocomplete="off" class="custom-input w-full p-2.5 pr-8 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700">
-                            <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs pointer-events-none"></i>
-                        </div>
-                        <input type="hidden" id="selectBarang" value="">
-                        <div id="suggestBarangBox" class="hidden absolute z-30 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100"></div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Stock Tersedia</label>
-                        <div class="flex items-center gap-1.5">
-                            <input type="text" id="infoStock" readonly placeholder="0" class="w-full p-2.5 bg-amber-50/80 border border-amber-200/90 font-bold text-amber-800 rounded-xl text-xs sm:text-sm text-center">
-                            <span id="infoSatuan" class="text-xs font-semibold text-slate-500 bg-slate-100 border border-slate-200 py-2.5 px-2 rounded-xl min-w-[3rem] text-center shrink-0">-</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Harga (Rp)</label>
-                        <input type="number" id="inputHarga" min="0" oninput="calculateRowTotal()" placeholder="0" class="custom-input w-full p-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Qty</label>
-                        <input type="number" id="inputQty" min="1" value="1" oninput="calculateRowTotal()" class="custom-input w-full p-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700 text-center font-semibold">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Diskon Item (Rp)</label>
-                        <input type="number" id="inputDiskonItem" min="0" value="0" oninput="calculateRowTotal()" class="custom-input w-full p-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-700">
-                    </div>
-                </div>
-
-                <div class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4 pt-3 border-t border-blue-100/80">
-                    <div class="text-xs sm:text-sm font-medium text-slate-600 flex items-center gap-2">
-                        <span>Subtotal Item:</span>
-                        <strong id="lblSubtotalItem" class="text-blue-700 font-bold text-base sm:text-lg bg-blue-100/50 px-3 py-1 rounded-lg border border-blue-200/50">Rp 0</strong>
-                    </div>
-                    <button onclick="addItemToTable()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:scale-98 text-white px-6 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 shadow-md shadow-blue-600/20 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Collect ke Tabel
-                    </button>
-                </div>
-            </div>
-
-            <!-- TABEL KOLEKSI TEMPORARY -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-blue-600"></i> Tabel Koleksi Sementara
-                    </h3>
-                </div>
-                <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm bg-white">
-                    <table class="w-full text-xs sm:text-sm text-left text-slate-600">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-50/90 border-b border-slate-200 font-semibold">
-                            <tr>
-                                <th class="px-4 py-3.5 text-center">No</th>
-                                <th class="px-4 py-3.5">Nama Barang</th>
-                                <th class="px-4 py-3.5 text-center">Satuan</th>
-                                <th class="px-4 py-3.5 text-right">Harga</th>
-                                <th class="px-4 py-3.5 text-center">Qty</th>
-                                <th class="px-4 py-3.5 text-right">Diskon</th>
-                                <th class="px-4 py-3.5 text-right">Total</th>
-                                <th class="px-4 py-3.5 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tblCartBody" class="divide-y divide-slate-100">
-                            <tr id="emptyRow">
-                                <td colspan="8" class="text-center py-10 text-slate-400">
-                                    <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2 text-slate-300 text-xl">
-                                        <i class="fa-solid fa-box-open"></i>
-                                    </div>
-                                    <p class="font-medium text-xs text-slate-500">Belum ada item yang dicollect.</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pt-2">
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                        <i class="fa-solid fa-note-sticky text-amber-500"></i> CATATAN TRANSAKSI
-                    </label>
-                    <textarea id="inputCatatan" rows="2" placeholder="Masukkan catatan tambahan untuk transaksi ini..." class="custom-input w-full p-2.5 border border-slate-300 rounded-xl text-xs text-slate-700"></textarea>
-                </div>
-            </div>
-
-            <!-- SUMMARY RINGKASAN -->
-            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/90 flex flex-col md:flex-row justify-between gap-6">
-                <div class="w-full md:w-1/2 space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Diskon Tambahan Faktur (Rp)</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-xs sm:text-sm font-medium">Rp</span>
-                            <input type="number" id="inputDiskonTambahan" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full pl-10 pr-3.5 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-200/60">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPN (Rp)</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-medium">Rp</span>
-                                <input type="number" id="inputPPN" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPh (Rp)</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-medium">Rp</span>
-                                <input type="number" id="inputPPh" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="w-full md:w-1/2 bg-white p-4 sm:p-5 rounded-xl border border-slate-200/90 space-y-2 shadow-sm">
-                    <div class="flex justify-between text-xs sm:text-sm">
-                        <span class="text-slate-500">Total Kotor (Sum Item):</span>
-                        <span id="lblTotalGross" class="font-semibold text-slate-800">Rp 0</span>
-                    </div>
-                    <div class="flex justify-between text-xs sm:text-sm">
-                        <span class="text-slate-500">Diskon Tambahan:</span>
-                        <span id="lblDiskonTambahan" class="font-semibold text-rose-500">- Rp 0</span>
-                    </div>
-                    <div class="flex justify-between text-xs sm:text-sm">
-                        <span class="text-slate-500">PPN (+):</span>
-                        <span id="lblPPN" class="font-semibold text-emerald-600">+ Rp 0</span>
-                    </div>
-                    <div class="flex justify-between text-xs sm:text-sm">
-                        <span class="text-slate-500">PPh (+):</span>
-                        <span id="lblPPh" class="font-semibold text-emerald-600">+ Rp 0</span>
-                    </div>
-                    <hr class="border-slate-200 my-1">
-                    <div class="flex justify-between text-sm sm:text-base font-bold text-slate-900 pt-1">
-                        <span>GRAND TOTAL:</span>
-                        <span id="lblGrandTotal" class="text-blue-700 text-base sm:text-xl font-extrabold">Rp 0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ACTION SUBMIT -->
-            <div class="flex justify-end pt-2">
-                <button id="btnSubmitResume" onclick="submitToSpreadsheet()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white px-8 py-3.5 rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 transition-all duration-200 flex items-center justify-center gap-2.5">
-                    <i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2
-                </button>
-            </div>
-
-        </div>
-
-        <!-- TAB 2: RESUME & GENERATE PDF -->
-        <div id="tab2" class="bg-white rounded-2xl card-shadow border border-slate-200/80 p-5 sm:p-7 hidden space-y-6">
-            
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <!-- Area Invoice yang akan di-convert ke PDF -->
+        <div id="invoiceArea" class="invoice-box">
+            <!-- Header Invoice -->
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
                 <div>
-                    <h2 class="text-base sm:text-lg font-bold text-slate-900">Resume & Faktur Penjualan Siap Cetak</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Pratinjau faktur hasil resume transaksi sebelum di-generate ke PDF.</p>
+                    <h2 class="text-2xl font-bold text-gray-800">FAKTUR PENJUALAN</h2>
+                    <p class="text-sm text-gray-500" id="invoiceKodeUnik">No: -</p>
+                    <p class="text-sm text-gray-500" id="invoiceTanggal">Tanggal: -</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="switchTab(1)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all">
-                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali Edit
-                    </button>
-                    <button id="btnDownloadPDF" onclick="downloadPDF()" class="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md shadow-rose-600/20 transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive
-                    </button>
+                <div class="text-right">
+                    <h3 class="font-bold text-lg text-gray-700">NAMA TOKO / BENGKEL</h3>
+                    <p class="text-xs text-gray-500">Jl. Contoh Alamat No. 123, Kota</p>
+                    <p class="text-xs text-gray-500">Telp: 0812-3456-7890</p>
                 </div>
             </div>
 
-            <!-- FAKTUR PENJUALAN PAPER -->
-            <div id="invoiceArea" class="invoice-paper p-6 sm:p-8 rounded-2xl mx-auto text-slate-800">
-                <div class="flex justify-between items-center border-b-2 border-slate-800 pb-4 mb-5">
-                    <div class="flex items-center gap-4">
-                        <img src="https://lh3.googleusercontent.com/d/1haUF2pUtkyxZoI4sKbBCtvhcBZrttkIl" alt="Logo Bengkel" class="w-16 h-16 object-contain shrink-0">
-                        <div>
-                            <h2 class="text-xl font-extrabold text-blue-950 uppercase tracking-tight">BANG SURYA AC</h2>
-                            <p class="text-[11px] text-slate-600 font-medium leading-tight mt-0.5">
-                                Jl. Baru 01/13 Wareng Ngalang Gedangsari Kab. Gunung Kidul D.I. Yogyakarta<br>
-                                <span class="font-semibold text-slate-700"><i class="fa-solid fa-phone text-[10px] mr-1"></i> Telp/WA: 0818 0413 6642</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="text-right shrink-0">
-                        <h1 class="text-lg font-black text-slate-900 tracking-wide uppercase">INVOICE</h1>
-                        <div class="inline-block bg-blue-50 text-blue-900 border border-blue-200/80 px-2.5 py-0.5 rounded text-xs font-bold font-mono mt-1" id="pdfKodeUnik">
-                            BS-XXXXXX
-                        </div>
-                        <p class="text-[11px] text-slate-500 mt-1 font-medium">Tanggal: <span id="pdfTanggal" class="text-slate-800 font-semibold">-</span></p>
-                    </div>
+            <!-- Informasi Pelanggan -->
+            <div class="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-lg">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase">Pelanggan</p>
+                    <p class="font-bold text-gray-700" id="invNamaCustomer">-</p>
+                    <p class="text-xs text-gray-600" id="invAlamatCustomer">-</p>
+                    <p class="text-xs text-gray-600" id="invNoHpCustomer">-</p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-5 text-[11px]">
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1">
-                        <p class="text-slate-600">Kode Pelanggan: <span id="pdfKodePelanggan" class="font-mono font-semibold text-slate-800">-</span></p>
-                        <p class="text-slate-500 font-semibold mb-1 uppercase tracking-wider text-[9px]">Kepada Yth:</p>
-                        <p class="text-xs font-bold text-slate-900" id="pdfNamaPelanggan">-</p>
-                        <p class="text-slate-600">Alamat: <span id="pdfAlamat" class="font-medium text-slate-800">-</span></p>
-                        <p class="text-slate-600">No. HP: <span id="pdfTelepon" class="font-medium text-slate-800">-</span></p>
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1 text-right">
-                        <p class="text-slate-500 font-semibold mb-1 uppercase tracking-wider text-[9px]">Informasi Kendaraan:</p>
-                        <p class="text-slate-600">Nopol: <span id="pdfNopol" class="font-bold text-slate-800">-</span></p>
-                        <p class="text-slate-600">Jenis Kendaraan: <span id="pdfJenisKendaraan" class="font-medium text-slate-800">-</span></p>
-                        <p class="text-slate-600">Kilometer Awal: <span id="pdfKmServis" class="font-medium text-slate-800">-</span></p>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto mb-4">
-                    <table class="w-full text-[11px] text-left text-slate-700 border-collapse">
-                        <thead>
-                            <tr class="bg-slate-900 text-white uppercase text-[9px] tracking-wider font-semibold">
-                                <th class="p-2 border border-slate-800 text-center">No</th>
-                                <th class="p-2 border border-slate-800">Nama Barang</th>
-                                <th class="p-2 border border-slate-800 text-center">Satuan</th>
-                                <th class="p-2 border border-slate-800 text-right">Harga</th>
-                                <th class="p-2 border border-slate-800 text-center">Qty</th>
-                                <th class="p-2 border border-slate-800 text-right">Diskon Item</th>
-                                <th class="p-2 border border-slate-800 text-right">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pdfTblBody" class="divide-y divide-slate-200 border-b border-slate-300"></tbody>
-                    </table>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 items-start mb-6">
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-[11px]">
-                        <p class="font-bold text-slate-700">Catatan / Keterangan:</p>
-                        <p id="pdfCatatan" class="text-slate-600 italic mt-0.5">-</p>
-                    </div>
-                    
-                    <div class="text-[11px] space-y-1 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-                        <div class="flex justify-between">
-                            <span class="text-slate-600 font-medium">Subtotal:</span>
-                            <span id="pdfSubtotal" class="font-semibold text-slate-800">Rp 0</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-600 font-medium">Diskon Tambahan:</span>
-                            <span class="text-rose-600 font-semibold" id="pdfDiskonTambahan">- Rp 0</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-600 font-medium">PPN:</span>
-                            <span class="text-emerald-600 font-semibold" id="pdfPPN">+ Rp 0</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-600 font-medium">PPh:</span>
-                            <span class="text-emerald-600 font-semibold" id="pdfPPh">+ Rp 0</span>
-                        </div>
-                        <hr class="border-slate-200 my-1">
-                        <div class="flex justify-between text-xs font-bold text-slate-900 pt-0.5">
-                            <span>TOTAL AKHIR:</span>
-                            <span id="pdfGrandTotal" class="text-blue-900 font-extrabold text-sm">Rp 0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-8 text-center text-[11px] text-slate-600 pt-2">
-                    <div>
-                        <p class="mb-10 font-medium">Penerima / Pelanggan,</p>
-                        <p class="font-bold border-t border-slate-400 inline-block px-6 pt-1 text-slate-800">( ..................................... )</p>
-                    </div>
-                    <div>
-                        <p class="mb-10 font-medium">Hormat Kami,</p>
-                        <p class="font-bold border-t border-slate-400 inline-block px-6 pt-1 text-slate-800" id="pdfSignAdmin">( Admin )</p>
-                    </div>
+                <div class="text-right">
+                    <p class="text-xs font-semibold text-gray-400 uppercase">Kendaraan / Admin</p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Nopol:</span> <span id="invNopol">-</span></p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Jenis:</span> <span id="invJenisKendaraan">-</span></p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Admin:</span> <span id="invAdmin">-</span></p>
                 </div>
             </div>
 
+            <!-- Tabel Detail Penjualan -->
+            <table class="w-full text-left mb-6 border-collapse">
+                <thead>
+                    <tr class="border-b bg-gray-100 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="py-2 px-2">No</th>
+                        <th class="py-2 px-2">Item / Sparepart</th>
+                        <th class="py-2 px-2 text-center">Qty</th>
+                        <th class="py-2 px-2 text-right">Harga</th>
+                        <th class="py-2 px-2 text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="invTbodyItems" class="text-sm divide-y">
+                    <!-- Item akan diisi secara dinamis -->
+                    <tr>
+                        <td colspan="5" class="py-4 text-center text-gray-400">Belum ada item terpilih</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Perhitungan / Ringkasan Pembayaran -->
+            <div class="flex justify-end border-t pt-4">
+                <div class="w-1/2 space-y-2 text-sm">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Subtotal:</span>
+                        <span id="invSubtotal" class="font-semibold">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>PPN:</span>
+                        <span id="invPPN">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>PPh:</span>
+                        <span id="invPPh">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Diskon Tambahan:</span>
+                        <span id="invDiskon">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-gray-800 border-t pt-2">
+                        <span>Grand Total:</span>
+                        <span id="invGrandTotal">Rp 0</span>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-    </main>
-
-    <!-- LOGIKA JAVASCRIPT -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        const DEFAULT_APP_URL = "https://script.google.com/macros/s/AKfycbwl9jqmHezZ77-0Zh-ezF--fdTzxZzQftLp1EKTx9g_mpjaPvR_Ub2LfDaCYOaxdS5o/exec";
-        const DRIVE_FOLDER_ID = "1g-Q0vLrEqoXycbrEU9fREkYlWowyD24q";
+        // CONFIG - Masukkan URL Deployment Apps Script & ID Folder Drive Kamu
+        const DEFAULT_APP_URL = "URL_WEB_APP_GOOGLE_APPS_SCRIPT_KAMU_DISINI";
+        const DRIVE_FOLDER_ID = "ID_FOLDER_GOOGLE_DRIVE_KAMU_DISINI";
 
-        let masterPelanggan = [];
-        let masterBarang = [];
-        let cartItems = [];
-        let currentKodeUnik = '';
+        // Variable State
+        let currentKodeUnik = "TRX-2026-001"; // Sesuaikan variabel ini sesuai kode unik faktur kamu
 
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('tglTransaksi').value = new Date().toISOString().split('T')[0];
-            
-            loadInitialData();
-
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('#suggestPelangganBox') && e.target.id !== 'searchPelanggan') {
-                    document.getElementById('suggestPelangganBox').classList.add('hidden');
-                }
-                if (!e.target.closest('#suggestBarangBox') && e.target.id !== 'searchBarang') {
-                    document.getElementById('suggestBarangBox').classList.add('hidden');
-                }
-            });
-        });
-
-        function loadInitialData() {
-            const icon = document.getElementById('refreshIcon');
-            icon.classList.add('fa-spin');
-
-            fetch(`${DEFAULT_APP_URL}?action=getDataMaster`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
-                .then(res => res.json())
-                .then(res => {
-                    icon.classList.remove('fa-spin');
-                    if(res.status === 'success') {
-                        masterPelanggan = res.pelanggan || [];
-                        masterBarang = res.barang || [];
-                    } else {
-                        alert('Gagal mengambil data master: ' + res.message);
-                    }
-                })
-                .catch(err => {
-                    icon.classList.remove('fa-spin');
-                    console.error(err);
-                });
-        }
-
-        // --- FILTER SUGGEST PELANGGAN (FILTER BY NAMA - KOLOM C) ---
-        function filterPelangganSuggest() {
-            const input = document.getElementById('searchPelanggan').value.toLowerCase();
-            const box = document.getElementById('suggestPelangganBox');
-            
-            if(!input) {
-                document.getElementById('selectPelanggan').value = "";
-                document.getElementById('kodePelanggan').value = "";
-                resetPelangganFields();
-            }
-
-            const filtered = masterPelanggan.filter(p => p.nama && String(p.nama).toLowerCase().includes(input));
-
-            if(filtered.length === 0) {
-                box.innerHTML = `<div class="p-3 text-xs text-slate-400 italic">Data pelanggan tidak ditemukan</div>`;
-            } else {
-                box.innerHTML = filtered.map(p => {
-                    const originalIndex = masterPelanggan.indexOf(p);
-                    return `
-                        <div onclick="selectPelangganItem(${originalIndex})" class="p-2.5 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors flex justify-between items-center">
-                            <span class="font-medium">${p.nama}</span>
-                            <span class="text-[10px] text-slate-500 font-mono bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">Kode: ${p.kode || '-'}</span>
-                        </div>
-                    `;
-                }).join('');
-            }
-            box.classList.remove('hidden');
-        }
-
-        // --- PEMETAAN TEPAT PRESISI DENGAN SPREADSHEET ---
-        function selectPelangganItem(idx) {
-            const p = masterPelanggan[idx];
-
-            document.getElementById('searchPelanggan').value = p.nama || '';
-            document.getElementById('selectPelanggan').value = idx;
-            document.getElementById('kodePelanggan').value = p.kode || '-';
-
-            if (p.tglFaktur) {
-                try {
-                    const formattedDate = new Date(p.tglFaktur).toISOString().split('T')[0];
-                    document.getElementById('tglTransaksi').value = formattedDate;
-                } catch(e) {
-                    console.log("Format tanggal dari sheet:", p.tglFaktur);
-                }
-            }
-
-            document.getElementById('pelangganTelepon').value = p.telepon || '-';        
-            document.getElementById('pelangganAlamat').value = p.alamat || '-';          
-            document.getElementById('pelangganNopol').value = p.nopol || '-';            
-            document.getElementById('pelangganJenisKendaraan').value = p.jenisKendaraan || '-'; 
-            document.getElementById('pelangganKmServis').value = p.kmServis || '-';      
-            document.getElementById('pelangganAdmin').value = p.admin || '-';            
-
-            document.getElementById('suggestPelangganBox').classList.add('hidden');
-        }
-
-        function resetPelangganFields() {
-            document.getElementById('pelangganNopol').value = '';
-            document.getElementById('pelangganJenisKendaraan').value = '';
-            document.getElementById('pelangganAlamat').value = '';
-            document.getElementById('pelangganTelepon').value = '';
-            document.getElementById('pelangganKmServis').value = '';
-            document.getElementById('pelangganAdmin').value = '';
-        }
-
-        // --- SUGGEST LOGIC: BARANG ---
-        function filterBarangSuggest() {
-            const input = document.getElementById('searchBarang').value.toLowerCase();
-            const box = document.getElementById('suggestBarangBox');
-
-            if(!input) {
-                document.getElementById('selectBarang').value = "";
-                onBarangChange();
-            }
-
-            const filtered = masterBarang.filter(b => b.nama && String(b.nama).toLowerCase().includes(input));
-
-            if(filtered.length === 0) {
-                box.innerHTML = `<div class="p-3 text-xs text-slate-400 italic">Data barang tidak ditemukan</div>`;
-            } else {
-                box.innerHTML = filtered.map(b => {
-                    const originalIndex = masterBarang.indexOf(b);
-                    return `
-                        <div onclick="selectBarangItem(${originalIndex})" class="p-2.5 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors flex justify-between items-center">
-                            <span class="font-medium">${b.nama}</span>
-                            <span class="text-[10px] text-amber-700 font-medium bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">Stok: ${b.stock}</span>
-                        </div>
-                    `;
-                }).join('');
-            }
-            box.classList.remove('hidden');
-        }
-
-        function selectBarangItem(idx) {
-            const b = masterBarang[idx];
-            document.getElementById('searchBarang').value = b.nama;
-            document.getElementById('selectBarang').value = idx;
-            document.getElementById('suggestBarangBox').classList.add('hidden');
-            onBarangChange();
-        }
-
-        function onBarangChange() {
-            const idx = document.getElementById('selectBarang').value;
-            if(idx !== "") {
-                const b = masterBarang[idx];
-                document.getElementById('infoStock').value = b.stock;
-                document.getElementById('infoSatuan').innerText = b.satuan || '-';
-                document.getElementById('inputHarga').value = b.harga || 0;
-            } else {
-                document.getElementById('infoStock').value = '0';
-                document.getElementById('infoSatuan').innerText = '-';
-                document.getElementById('inputHarga').value = '';
-            }
-            calculateRowTotal();
-        }
-
-        function calculateRowTotal() {
-            const harga = parseFloat(document.getElementById('inputHarga').value) || 0;
-            const qty = parseFloat(document.getElementById('inputQty').value) || 0;
-            const diskon = parseFloat(document.getElementById('inputDiskonItem').value) || 0;
-
-            const total = (harga * qty) - diskon;
-            document.getElementById('lblSubtotalItem').innerText = formatRupiah(total < 0 ? 0 : total);
-        }
-
-        function addItemToTable() {
-            const barangIdx = document.getElementById('selectBarang').value;
-            if(barangIdx === "") {
-                alert('Silakan pilih barang dari daftar suggestion terlebih dahulu!');
-                return;
-            }
-
-            const barang = masterBarang[barangIdx];
-            const qty = parseFloat(document.getElementById('inputQty').value) || 0;
-            const harga = parseFloat(document.getElementById('inputHarga').value) || 0;
-            const diskon = parseFloat(document.getElementById('inputDiskonItem').value) || 0;
-
-            if(qty <= 0) {
-                alert('Qty harus lebih dari 0!');
-                return;
-            }
-
-            const total = (harga * qty) - diskon;
-
-            // MENGAMBIL KODE BARANG DARI KOLOM A SHEET OPERATOR BARANG (barang.kode)
-            // KODE BARANG HANYA DICATAT DI PROPERTI 'kodeBarang' UNTUK DISIMPAN DI KOLOM P SHEET PENJUALAN
-            cartItems.push({
-                kodeBarang: barang.kode || '', 
-                namaBarang: barang.nama,
-                satuan: barang.satuan,
-                harga: harga,
-                qty: qty,
-                diskon: diskon,
-                total: total < 0 ? 0 : total
-            });
-
-            document.getElementById('searchBarang').value = "";
-            document.getElementById('selectBarang').value = "";
-            document.getElementById('infoStock').value = "0";
-            document.getElementById('infoSatuan').innerText = "-";
-            document.getElementById('inputHarga').value = "";
-            document.getElementById('inputQty').value = "1";
-            document.getElementById('inputDiskonItem').value = "0";
-            document.getElementById('lblSubtotalItem').innerText = "Rp 0";
-
-            renderCartTable();
-            calculateGrandTotal();
-        }
-
-        function updateItemName(index, newName) {
-            cartItems[index].namaBarang = newName;
-        }
-
-        function removeItem(idx) {
-            cartItems.splice(idx, 1);
-            renderCartTable();
-            calculateGrandTotal();
-        }
-
-        function renderCartTable() {
-            const tbody = document.getElementById('tblCartBody');
-            if(cartItems.length === 0) {
-                tbody.innerHTML = `
-                    <tr id="emptyRow">
-                        <td colspan="8" class="text-center py-10 text-slate-400">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2 text-slate-300 text-xl">
-                                <i class="fa-solid fa-box-open"></i>
-                            </div>
-                            <p class="font-medium text-xs text-slate-500">Belum ada item yang dicollect.</p>
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            tbody.innerHTML = '';
-            cartItems.forEach((item, index) => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-4 py-3.5 text-center font-medium text-slate-400">${index + 1}</td>
-                        <td class="px-4 py-3.5">
-                            <input type="text" value="${item.namaBarang}" oninput="updateItemName(${index}, this.value)" class="custom-input w-full p-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800">
-                        </td>
-                        <td class="px-4 py-3.5 text-center font-medium text-slate-600">${item.satuan}</td>
-                        <td class="px-4 py-3.5 text-right font-medium text-slate-700">${formatRupiah(item.harga)}</td>
-                        <td class="px-4 py-3.5 text-center font-bold text-slate-900">${item.qty}</td>
-                        <td class="px-4 py-3.5 text-right font-medium text-rose-500">${formatRupiah(item.diskon)}</td>
-                        <td class="px-4 py-3.5 text-right font-bold text-slate-900">${formatRupiah(item.total)}</td>
-                        <td class="px-4 py-3.5 text-center">
-                            <button onclick="removeItem(${index})" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors flex items-center justify-center mx-auto">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function calculateGrandTotal() {
-            const sumGross = cartItems.reduce((acc, curr) => acc + curr.total, 0);
-            const diskonTambahan = parseFloat(document.getElementById('inputDiskonTambahan').value) || 0;
-            const nominalPPN = parseFloat(document.getElementById('inputPPN').value) || 0;
-            const nominalPPh = parseFloat(document.getElementById('inputPPh').value) || 0;
-
-            const grandTotal = (sumGross - diskonTambahan) + nominalPPN + nominalPPh;
-
-            document.getElementById('lblTotalGross').innerText = formatRupiah(sumGross);
-            document.getElementById('lblDiskonTambahan').innerText = "- " + formatRupiah(diskonTambahan);
-            document.getElementById('lblPPN').innerText = "+ " + formatRupiah(nominalPPN);
-            document.getElementById('lblPPh').innerText = "+ " + formatRupiah(nominalPPh);
-            document.getElementById('lblGrandTotal').innerText = formatRupiah(grandTotal < 0 ? 0 : grandTotal);
-        }
-
-        function submitToSpreadsheet() {
-            const pelangganIdx = document.getElementById('selectPelanggan').value;
-            if(pelangganIdx === "") {
-                alert('Silakan pilih pelanggan dari daftar suggestion terlebih dahulu!');
-                return;
-            }
-            if(cartItems.length === 0) {
-                alert('Tabel item masih kosong! Silakan collect item terlebih dahulu.');
-                return;
-            }
-
-            const namaPelanggan = masterPelanggan[pelangganIdx].nama;
-            const kodePelanggan = document.getElementById('kodePelanggan').value;
-            const tgl = document.getElementById('tglTransaksi').value;
-            const diskonTambahan = parseFloat(document.getElementById('inputDiskonTambahan').value) || 0;
-            const catatan = document.getElementById('inputCatatan').value || '';
-            const nominalPPN = parseFloat(document.getElementById('inputPPN').value) || 0;
-            const nominalPPh = parseFloat(document.getElementById('inputPPh').value) || 0;
-
-            const extraData = {
-                nopol: document.getElementById('pelangganNopol').value,
-                jenisKendaraan: document.getElementById('pelangganJenisKendaraan').value,
-                alamat: document.getElementById('pelangganAlamat').value,
-                telepon: document.getElementById('pelangganTelepon').value,
-                kmServis: document.getElementById('pelangganKmServis').value,
-                admin: document.getElementById('pelangganAdmin').value
-            };
-            
-            const payload = {
-                namaPelanggan: namaPelanggan,
-                kodePelanggan: kodePelanggan,
-                tanggal: tgl,
-                diskonTambahan: diskonTambahan,
-                catatan: catatan,      
-                ppn: nominalPPN,       
-                pph: nominalPPh,       
-                admin: extraData.admin,
-                items: cartItems 
-            };
-
-            const submitBtn = document.getElementById('btnSubmitResume');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Spreadsheet...';
-
-            const targetUrl = `${DEFAULT_APP_URL}?action=submitFakturData&data=${encodeURIComponent(JSON.stringify(payload))}`;
-
-            fetch(targetUrl, {
-                method: 'GET',
-                redirect: 'follow'
-            })
-                .then(res => res.json())
-                .then(res => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
-
-                    if(res.status === 'success') {
-                        currentKodeUnik = res.kodeUnik;
-                        alert(`Berhasil Submit ke Spreadsheet! Kode Unik: ${res.kodeUnik}`);
-                        
-                        prepareResumeTab(namaPelanggan, kodePelanggan, tgl, diskonTambahan, nominalPPN, nominalPPh, catatan, extraData, res.kodeUnik);
-                        switchTab(2);
-                    } else {
-                        alert('Gagal submit data: ' + res.message);
-                    }
-                })
-                .catch(err => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Resume ke Spreadsheet & Lanjut ke Jendela 2';
-                    console.error(err);
-                    alert('Terjadi kesalahan koneksi.');
-                });
-        }
-
-        function prepareResumeTab(namaPelanggan, kodePelanggan, tgl, diskonTambahan, ppnVal, pphVal, catatan, extra, kodeUnik) {
-            document.getElementById('pdfKodeUnik').innerText = kodeUnik;
-            document.getElementById('pdfTanggal').innerText = tgl;
-            document.getElementById('pdfNamaPelanggan').innerText = namaPelanggan;
-            document.getElementById('pdfKodePelanggan').innerText = kodePelanggan;
-
-            document.getElementById('pdfAlamat').innerText = extra.alamat || '-';
-            document.getElementById('pdfTelepon').innerText = extra.telepon || '-';
-            document.getElementById('pdfNopol').innerText = extra.nopol || '-';
-            document.getElementById('pdfJenisKendaraan').innerText = extra.jenisKendaraan || '-';
-            document.getElementById('pdfKmServis').innerText = extra.kmServis || '-';
-            document.getElementById('pdfSignAdmin').innerText = extra.admin ? `( ${extra.admin} )` : '( Admin )';
-            document.getElementById('pdfCatatan').innerText = catatan || '-';
-
-            const pdfTbody = document.getElementById('pdfTblBody');
-            pdfTbody.innerHTML = '';
-
-            let sumGross = 0;
-            cartItems.forEach((item, idx) => {
-                sumGross += item.total;
-                pdfTbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2 border text-center font-medium">${idx + 1}</td>
-                        <td class="p-2 border font-semibold text-slate-800">${item.namaBarang}</td>
-                        <td class="p-2 border text-center font-medium">${item.satuan}</td>
-                        <td class="p-2 border text-right font-medium">${formatRupiah(item.harga)}</td>
-                        <td class="p-2 border text-center font-bold">${item.qty}</td>
-                        <td class="p-2 border text-right font-medium text-rose-500">${formatRupiah(item.diskon)}</td>
-                        <td class="p-2 border text-right font-bold text-slate-900">${formatRupiah(item.total)}</td>
-                    </tr>
-                `;
-            });
-
-            const grandTotal = (sumGross - diskonTambahan) + ppnVal + pphVal;
-
-            document.getElementById('pdfSubtotal').innerText = formatRupiah(sumGross);
-            document.getElementById('pdfDiskonTambahan').innerText = "- " + formatRupiah(diskonTambahan);
-            document.getElementById('pdfPPN').innerText = "+ " + formatRupiah(ppnVal);
-            document.getElementById('pdfPPh').innerText = "+ " + formatRupiah(pphVal);
-            document.getElementById('pdfGrandTotal').innerText = formatRupiah(grandTotal < 0 ? 0 : grandTotal);
-        }
-
-        function switchTab(tabIndex) {
-            const tab1 = document.getElementById('tab1');
-            const tab2 = document.getElementById('tab2');
-            const btn1 = document.getElementById('tabBtn1');
-            const btn2 = document.getElementById('tabBtn2');
-
-            if(tabIndex === 1) {
-                tab1.classList.remove('hidden');
-                tab2.classList.add('hidden');
-                btn1.className = "flex-1 py-2.5 px-5 text-center font-semibold text-blue-600 bg-white rounded-xl shadow-sm focus:outline-none transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm";
-                btn2.className = "flex-1 py-2.5 px-5 text-center font-semibold text-slate-600 hover:text-slate-900 rounded-xl focus:outline-none transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm";
-            } else {
-                tab1.classList.add('hidden');
-                tab2.classList.remove('hidden');
-                btn2.className = "flex-1 py-2.5 px-5 text-center font-semibold text-blue-600 bg-white rounded-xl shadow-sm focus:outline-none transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm";
-                btn1.className = "flex-1 py-2.5 px-5 text-center font-semibold text-slate-600 hover:text-slate-900 rounded-xl focus:outline-none transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm";
-            }
-        }
-
+        /**
+         * FUNGSI UNTUK GENERATE PDF & UPLOAD KE GOOGLE DRIVE
+         */
         function downloadPDF() {
             const btn = document.getElementById('btnDownloadPDF');
+            
+            // UI Feedback: Disable tombol saat proses
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses & Mengunggah...';
 
             const element = document.getElementById('invoiceArea');
             
+            // Konfigurasi html2pdf
             const opt = {
                 margin:       [0.3, 0.3, 0.3, 0.3],
                 filename:     `Faktur_${currentKodeUnik || 'Penjualan'}.pdf`,
@@ -890,9 +156,12 @@
                 pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
+            // Process Convert PDF
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
+                // 1. Simpan PDF ke Komputer lokal user
                 html2pdf().set(opt).from(element).save();
 
+                // 2. Persiapkan Payload untuk dikirim ke Google Apps Script
                 const base64Clean = pdfBase64.split(',')[1] || pdfBase64;
 
                 const payload = {
@@ -903,31 +172,35 @@
                     pdfBase64: base64Clean
                 };
 
+                // 3. Kirim via Fetch API ke Google Apps Script
                 fetch(DEFAULT_APP_URL, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8' // Menghindari CORS Issues
+                    },
                     body: JSON.stringify(payload)
                 })
                 .then(res => res.json())
                 .then(res => {
+                    // Reset Tombol UI
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive';
+
+                    // Respon Handler
                     if(res.status === 'success') {
-                        alert('PDF berhasil di-generate, diunduh, dan tersimpan di Google Drive!');
+                        alert('✅ PDF Berhasil diunduh lokal & tersimpan di Google Drive serta Kolom Q Sheet PENJUALAN!');
                     } else {
-                        alert('PDF diunduh lokal, namun gagal upload ke Drive: ' + res.message);
+                        alert('⚠️ PDF terunduh lokal, namun gagal unggah ke Drive: ' + (res.message || res.error));
                     }
                 })
                 .catch(err => {
+                    // Reset Tombol UI jika Terjadi Error Networking
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Generate PDF Faktur & Simpan Drive';
-                    console.error(err);
-                    alert('PDF diunduh lokal. Terjadi kesalahan saat mengunggah ke Drive.');
+                    console.error("Fetch Error:", err);
+                    alert('⚠️ PDF terunduh lokal. Terjadi error saat mengunggah ke Drive: ' + err.message);
                 });
             });
-        }
-
-        function formatRupiah(val) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
         }
     </script>
 </body>
