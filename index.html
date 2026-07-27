@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap');
         
         body { 
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
@@ -54,13 +54,74 @@
             outline: none;
         }
 
+        /* OUTLINE KERTAS DIHAPUS */
         .invoice-paper {
             background: #ffffff;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
-            border: 1px solid #e2e8f0;
+            border: none !important;
+            box-shadow: none !important;
             width: 100%;
             max-width: 800px;
             box-sizing: border-box;
+            font-family: 'Courier Prime', monospace, Arial, sans-serif;
+            color: #000;
+        }
+
+        /* Dot Matrix Layout Styling */
+        .dot-matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dot-matrix-table th {
+            border-top: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            padding: 4px 2px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .dot-matrix-table td {
+            padding: 3px 2px;
+            font-size: 8px;
+            font-weight: normal;
+        }
+        .dot-matrix-border-top {
+            border-top: 1px dashed #000;
+        }
+        .dot-matrix-border-bottom {
+            border-bottom: 1px dashed #000;
+        }
+        .text-size-8 {
+            font-size: 8px !important;
+            font-weight: normal !important;
+        }
+        .text-size-9 {
+            font-size: 9px !important;
+        }
+
+        /* Spotlight Header Invoice */
+        .title-spotlight {
+            font-size: 32px !important;
+            font-weight: 800 !important;
+            line-height: 1 !important;
+            margin-bottom: 4px !important;
+            text-transform: uppercase;
+        }
+
+        /* UTILITY UNTUK KETERANGAN & COLON (:) SEJAJAR */
+        .info-row {
+            display: grid;
+            grid-template-columns: 100px 10px 1fr;
+            align-items: center;
+        }
+        .info-row-right {
+            display: grid;
+            grid-template-columns: 130px 10px 1fr;
+            align-items: center;
+        }
+        .info-row-header {
+            display: grid;
+            grid-template-columns: 55px 10px 1fr;
+            align-items: center;
         }
     </style>
 </head>
@@ -70,7 +131,7 @@
     <header class="glass-header text-white shadow-md relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
             <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 p-1 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
+                <div class="rounded-xl bg-white/10 backdrop-blur-md border border-white/20 p-1 flex items-center justify-center shadow-inner shrink-0 overflow-hidden" style="width: 6.5rem; height: 6.5rem;">
                     <img src="https://lh3.googleusercontent.com/d/1GAPrkrsiup-gN5qlU4XcUlmkDuz1tDDj" alt="Logo Web" class="w-full h-full object-contain">
                 </div>
                 <div>
@@ -220,7 +281,7 @@
                 <div class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4 pt-3 border-t border-blue-100/80">
                     <div class="text-xs sm:text-sm font-medium text-slate-600 flex items-center gap-2">
                         <span>Subtotal Item:</span>
-                        <strong id="lblSubtotalItem" class="text-blue-700 font-bold text-base sm:text-lg bg-blue-100/50 px-3 py-1 rounded-lg border border-blue-200/50">Rp 0</strong>
+                        <strong id="lblSubtotalItem" class="text-blue-700 font-bold text-base sm:text-lg bg-blue-100/50 px-3 py-1 rounded-lg border border-blue-200/50">0</strong>
                     </div>
                     <button onclick="addItemToTable()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:scale-98 text-white px-6 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 shadow-md shadow-blue-600/20 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-plus"></i> Collect ke Tabel
@@ -274,26 +335,23 @@
             <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/90 flex flex-col md:flex-row justify-between gap-6">
                 <div class="w-full md:w-1/2 space-y-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Diskon Tambahan Faktur (Rp)</label>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Diskon Tambahan Faktur</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-xs sm:text-sm font-medium">Rp</span>
-                            <input type="number" id="inputDiskonTambahan" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full pl-10 pr-3.5 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
+                            <input type="number" id="inputDiskonTambahan" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full px-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-200/60">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPN (Rp)</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPN</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-medium">Rp</span>
-                                <input type="number" id="inputPPN" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
+                                <input type="number" id="inputPPN" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full px-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPh (Rp)</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">PPh</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-medium">Rp</span>
-                                <input type="number" id="inputPPh" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
+                                <input type="number" id="inputPPh" value="0" min="0" oninput="calculateGrandTotal()" placeholder="0" class="custom-input w-full px-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-800">
                             </div>
                         </div>
                     </div>
@@ -302,24 +360,24 @@
                 <div class="w-full md:w-1/2 bg-white p-4 sm:p-5 rounded-xl border border-slate-200/90 space-y-2 shadow-sm">
                     <div class="flex justify-between text-xs sm:text-sm">
                         <span class="text-slate-500">Total Kotor (Sum Item):</span>
-                        <span id="lblTotalGross" class="font-semibold text-slate-800">Rp 0</span>
+                        <span id="lblTotalGross" class="font-semibold text-slate-800">0</span>
                     </div>
                     <div class="flex justify-between text-xs sm:text-sm">
                         <span class="text-slate-500">Diskon Tambahan:</span>
-                        <span id="lblDiskonTambahan" class="font-semibold text-rose-500">- Rp 0</span>
+                        <span id="lblDiskonTambahan" class="font-semibold text-rose-500">- 0</span>
                     </div>
                     <div class="flex justify-between text-xs sm:text-sm">
                         <span class="text-slate-500">PPN (+):</span>
-                        <span id="lblPPN" class="font-semibold text-emerald-600">+ Rp 0</span>
+                        <span id="lblPPN" class="font-semibold text-emerald-600">+ 0</span>
                     </div>
                     <div class="flex justify-between text-xs sm:text-sm">
                         <span class="text-slate-500">PPh (+):</span>
-                        <span id="lblPPh" class="font-semibold text-emerald-600">+ Rp 0</span>
+                        <span id="lblPPh" class="font-semibold text-emerald-600">+ 0</span>
                     </div>
                     <hr class="border-slate-200 my-1">
                     <div class="flex justify-between text-sm sm:text-base font-bold text-slate-900 pt-1">
                         <span>GRAND TOTAL:</span>
-                        <span id="lblGrandTotal" class="text-blue-700 text-base sm:text-xl font-extrabold">Rp 0</span>
+                        <span id="lblGrandTotal" class="text-blue-700 text-base sm:text-xl font-extrabold">0</span>
                     </div>
                 </div>
             </div>
@@ -352,99 +410,142 @@
             </div>
 
             <!-- FAKTUR PENJUALAN PAPER -->
-            <div id="invoiceArea" class="invoice-paper p-6 sm:p-8 rounded-2xl mx-auto text-slate-800">
-                <div class="flex justify-between items-center border-b-2 border-slate-800 pb-4 mb-5">
-                    <div class="flex items-center gap-4">
-                        <img src="https://lh3.googleusercontent.com/d/1haUF2pUtkyxZoI4sKbBCtvhcBZrttkIl" alt="Logo Bengkel" class="w-16 h-16 object-contain shrink-0">
-                        <div>
-                            <h2 class="text-xl font-extrabold text-blue-950 uppercase tracking-tight">BANG SURYA AC</h2>
-                            <p class="text-[11px] text-slate-600 font-medium leading-tight mt-0.5">
-                                Jl. Baru 01/13 Wareng Ngalang Gedangsari Kab. Gunung Kidul D.I. Yogyakarta<br>
-                                <span class="font-semibold text-slate-700"><i class="fa-solid fa-phone text-[10px] mr-1"></i> Telp/WA: 0818 0413 6642</span>
+            <div id="invoiceArea" class="invoice-paper p-5 rounded-none mx-auto text-black">
+                
+                <!-- HEADER FAKTUR -->
+                <div class="flex justify-between items-start pb-2 mb-2 border-b border-black">
+                    <div class="flex items-center gap-3.5">
+                        <!-- LOGO PADA INVOICE / PDF DIKEMBALIKAN DI SINI -->
+                        <div class="w-[120px] h-[120px] shrink-0 flex items-center justify-center overflow-hidden">"
+                            <img src="https://lh3.googleusercontent.com/d/1haUF2pUtkyxZoI4sKbBCtvhcBZrttkIl" alt="Logo Invoice" class="w-full h-full object-contain">
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <h2 class="title-spotlight">BANG SURYA AC</h2>
+                            <p class="text-size-8 leading-tight">
+                                Jl. Baru 01/13 Wareng Ngalang Gedangsari<br>
+                                Kab. Gunung Kidul D.I. Yogyakarta<br>
+                                Telp/WA: 0818 0413 6642 
                             </p>
+                            <span class="text-[12px] font-bold tracking-tight uppercase mt-1">BENGKEL RESMI AC MOBIL</span>
                         </div>
                     </div>
-                    <div class="text-right shrink-0">
-                        <h1 class="text-lg font-black text-slate-900 tracking-wide uppercase">INVOICE</h1>
-                        <div class="inline-block bg-blue-50 text-blue-900 border border-blue-200/80 px-2.5 py-0.5 rounded text-xs font-bold font-mono mt-1" id="pdfKodeUnik">
-                            BS-XXXXXX
+                    <div class="shrink-0 text-size-8">
+                        <h1 class="text-size-9 font-bold tracking-wider uppercase mb-1 text-right">INVOICE</h1>
+                        <div class="info-row-header">
+                            <span>Nomor</span>
+                            <span>:</span>
+                            <span id="pdfKodeUnik" class="font-bold">BS-XXXXXX</span>
                         </div>
-                        <p class="text-[11px] text-slate-500 mt-1 font-medium">Tanggal: <span id="pdfTanggal" class="text-slate-800 font-semibold">-</span></p>
+                        <div class="info-row-header">
+                            <span>Tanggal</span>
+                            <span>:</span>
+                            <span id="pdfTanggal" class="font-normal">-</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-5 text-[11px]">
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1">
-                        <p class="text-slate-600">Kode Pelanggan: <span id="pdfKodePelanggan" class="font-mono font-semibold text-slate-800">-</span></p>
-                        <p class="text-slate-500 font-semibold mb-1 uppercase tracking-wider text-[9px]">Kepada Yth:</p>
-                        <p class="text-xs font-bold text-slate-900" id="pdfNamaPelanggan">-</p>
-                        <p class="text-slate-600">Alamat: <span id="pdfAlamat" class="font-medium text-slate-800">-</span></p>
-                        <p class="text-slate-600">No. HP: <span id="pdfTelepon" class="font-medium text-slate-800">-</span></p>
+                <!-- INFORMASI PELANGGAN & KENDARAAN -->
+                <div class="grid grid-cols-2 gap-4 mb-2 text-size-8">
+                    <div class="space-y-0.5">
+                        <div class="info-row">
+                            <span>Kode Pel.</span>
+                            <span>:</span>
+                            <span id="pdfKodePelanggan">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Kepada Yth</span>
+                            <span>:</span>
+                            <span id="pdfNamaPelanggan" class="font-bold">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Alamat</span>
+                            <span>:</span>
+                            <span id="pdfAlamat">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span>No. Tlp</span>
+                            <span>:</span>
+                            <span id="pdfTelepon">-</span>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1 text-right">
-                        <p class="text-slate-500 font-semibold mb-1 uppercase tracking-wider text-[9px]">Informasi Kendaraan:</p>
-                        <p class="text-slate-600">Nopol: <span id="pdfNopol" class="font-bold text-slate-800">-</span></p>
-                        <p class="text-slate-600">Jenis Kendaraan: <span id="pdfJenisKendaraan" class="font-medium text-slate-800">-</span></p>
-                        <p class="text-slate-600">Kilometer Awal: <span id="pdfKmServis" class="font-medium text-slate-800">-</span></p>
+                    
+                    <div class="space-y-0.5 ml-auto w-full max-w-[280px]">
+                        <div class="info-row-right">
+                            <span>Jenis Kendaraan</span>
+                            <span>:</span>
+                            <span id="pdfJenisKendaraan">-</span>
+                        </div>
+                        <div class="info-row-right">
+                            <span>Nopol</span>
+                            <span>:</span>
+                            <span id="pdfNopol" class="font-bold">-</span>
+                        </div>
+                        <div class="info-row-right">
+                            <span>Kilometer Awal</span>
+                            <span>:</span>
+                            <span id="pdfKmServis">-</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto mb-4">
-                    <table class="w-full text-[11px] text-left text-slate-700 border-collapse">
+                <!-- TABEL ITEM BARANG -->
+                <div class="mb-2">
+                    <table class="dot-matrix-table">
                         <thead>
-                            <tr class="bg-slate-900 text-white uppercase text-[9px] tracking-wider font-semibold">
-                                <th class="p-2 border border-slate-800 text-center">No</th>
-                                <th class="p-2 border border-slate-800">Nama Barang</th>
-                                <th class="p-2 border border-slate-800 text-center">Satuan</th>
-                                <th class="p-2 border border-slate-800 text-right">Harga</th>
-                                <th class="p-2 border border-slate-800 text-center">Qty</th>
-                                <th class="p-2 border border-slate-800 text-right">Diskon Item</th>
-                                <th class="p-2 border border-slate-800 text-right">Total</th>
+                            <tr>
+                                <th class="text-center w-8">No</th>
+                                <th class="text-left">Kode Barang</th>
+                                <th class="text-left">Nama Barang</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-right">@Harga</th>
+                                <th class="text-right">Diskon</th>
+                                <th class="text-right">Total Harga</th>
                             </tr>
                         </thead>
-                        <tbody id="pdfTblBody" class="divide-y divide-slate-200 border-b border-slate-300"></tbody>
+                        <tbody id="pdfTblBody"></tbody>
                     </table>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 items-start mb-6">
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-[11px]">
-                        <p class="font-bold text-slate-700">Catatan / Keterangan:</p>
-                        <p id="pdfCatatan" class="text-slate-600 italic mt-0.5">-</p>
+                <!-- SUMMARY & CATATAN -->
+                <div class="grid grid-cols-2 gap-4 items-start mb-4 text-size-8 pt-1 dot-matrix-border-top">
+                    <div>
+                        <p class="text-size-9 font-bold">Catatan / Garansi:</p>
+                        <p id="pdfCatatan" class="text-size-8 italic mt-0.5">-</p>
                     </div>
                     
-                    <div class="text-[11px] space-y-1 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                    <div class="space-y-0.5 text-size-8">
                         <div class="flex justify-between">
-                            <span class="text-slate-600 font-medium">Subtotal:</span>
-                            <span id="pdfSubtotal" class="font-semibold text-slate-800">Rp 0</span>
+                            <span>Sub Total:</span>
+                            <span id="pdfSubtotal" class="text-size-8 font-normal">0</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-600 font-medium">Diskon Tambahan:</span>
-                            <span class="text-rose-600 font-semibold" id="pdfDiskonTambahan">- Rp 0</span>
+                            <span>Diskon:</span>
+                            <span id="pdfDiskonTambahan" class="text-size-8 font-normal">0</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-600 font-medium">PPN:</span>
-                            <span class="text-emerald-600 font-semibold" id="pdfPPN">+ Rp 0</span>
+                            <span>PPN:</span>
+                            <span id="pdfPPN" class="text-size-8 font-normal">0</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-600 font-medium">PPh:</span>
-                            <span class="text-emerald-600 font-semibold" id="pdfPPh">+ Rp 0</span>
+                            <span>PPh:</span>
+                            <span id="pdfPPh" class="text-size-8 font-normal">0</span>
                         </div>
-                        <hr class="border-slate-200 my-1">
-                        <div class="flex justify-between text-xs font-bold text-slate-900 pt-0.5">
-                            <span>TOTAL AKHIR:</span>
-                            <span id="pdfGrandTotal" class="text-blue-900 font-extrabold text-sm">Rp 0</span>
+                        <div class="flex justify-between font-bold border-t border-black pt-0.5 mt-0.5">
+                            <span class="text-size-9">Total:</span>
+                            <span id="pdfGrandTotal" class="text-size-9">0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8 text-center text-[11px] text-slate-600 pt-2">
-                    <div>
-                        <p class="mb-10 font-medium">Penerima / Pelanggan,</p>
-                        <p class="font-bold border-t border-slate-400 inline-block px-6 pt-1 text-slate-800">( ..................................... )</p>
+                <!-- TANDA TANGAN -->
+                <div class="flex justify-start gap-12 text-center text-size-8 pt-2">
+                    <div class="w-44">
+                        <p class="mb-8 text-size-8">Penerima / Pelanggan</p>
+                        <p class="text-size-8 font-normal">( .............................. )</p>
                     </div>
-                    <div>
-                        <p class="mb-10 font-medium">Hormat Kami,</p>
-                        <p class="font-bold border-t border-slate-400 inline-block px-6 pt-1 text-slate-800" id="pdfSignAdmin">( Admin )</p>
+                    <div class="w-44">
+                        <p class="mb-8 text-size-8">Hormat Kami,</p>
+                        <p class="text-size-8 font-normal" id="pdfSignAdmin">( Admin )</p>
                     </div>
                 </div>
             </div>
@@ -662,7 +763,7 @@
             document.getElementById('inputHarga').value = "";
             document.getElementById('inputQty').value = "1";
             document.getElementById('inputDiskonItem').value = "0";
-            document.getElementById('lblSubtotalItem').innerText = "Rp 0";
+            document.getElementById('lblSubtotalItem').innerText = "0";
 
             renderCartTable();
             calculateGrandTotal();
@@ -825,14 +926,14 @@
             cartItems.forEach((item, idx) => {
                 sumGross += item.total;
                 pdfTbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2 border text-center font-medium">${idx + 1}</td>
-                        <td class="p-2 border font-semibold text-slate-800">${item.namaBarang}</td>
-                        <td class="p-2 border text-center font-medium">${item.satuan}</td>
-                        <td class="p-2 border text-right font-medium">${formatRupiah(item.harga)}</td>
-                        <td class="p-2 border text-center font-bold">${item.qty}</td>
-                        <td class="p-2 border text-right font-medium text-rose-500">${formatRupiah(item.diskon)}</td>
-                        <td class="p-2 border text-right font-bold text-slate-900">${formatRupiah(item.total)}</td>
+                    <tr>
+                        <td class="text-center text-size-8">${idx + 1}</td>
+                        <td class="text-left text-size-8">${item.kodeBarang || '-'}</td>
+                        <td class="text-left text-size-8">${item.namaBarang}</td>
+                        <td class="text-center text-size-8">${item.qty}</td>
+                        <td class="text-right text-size-8">${formatRupiah(item.harga)}</td>
+                        <td class="text-right text-size-8">${formatRupiah(item.diskon)}</td>
+                        <td class="text-right text-size-8">${formatRupiah(item.total)}</td>
                     </tr>
                 `;
             });
@@ -840,9 +941,9 @@
             const grandTotal = (sumGross - diskonTambahan) + ppnVal + pphVal;
 
             document.getElementById('pdfSubtotal').innerText = formatRupiah(sumGross);
-            document.getElementById('pdfDiskonTambahan').innerText = "- " + formatRupiah(diskonTambahan);
-            document.getElementById('pdfPPN').innerText = "+ " + formatRupiah(ppnVal);
-            document.getElementById('pdfPPh').innerText = "+ " + formatRupiah(pphVal);
+            document.getElementById('pdfDiskonTambahan').innerText = formatRupiah(diskonTambahan);
+            document.getElementById('pdfPPN').innerText = formatRupiah(ppnVal);
+            document.getElementById('pdfPPh').innerText = formatRupiah(pphVal);
             document.getElementById('pdfGrandTotal').innerText = formatRupiah(grandTotal < 0 ? 0 : grandTotal);
         }
 
@@ -866,7 +967,7 @@
         }
 
         /**
-         * FUNGSI GENERATE PDF & SIMPAN GOOGLE DRIVE (Disempurnakan)
+         * FUNGSI GENERATE PDF & SIMPAN GOOGLE DRIVE
          */
         function downloadPDF() {
             const btn = document.getElementById('btnDownloadPDF');
@@ -876,7 +977,7 @@
             const element = document.getElementById('invoiceArea');
             
             const opt = {
-                margin:       [0.3, 0.3, 0.3, 0.3],
+                margin:       [0.2, 0.2, 0.2, 0.2],
                 filename:     `Faktur_${currentKodeUnik || 'Penjualan'}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
@@ -891,7 +992,6 @@
             };
 
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
-                // Download file PDF lokal di PC/HP user
                 html2pdf().set(opt).from(element).save();
 
                 const base64Clean = pdfBase64.split(',')[1] || pdfBase64;
@@ -904,7 +1004,6 @@
                     pdfBase64: base64Clean
                 };
 
-                // Mengirim request POST dengan Content-Type text/plain untuk kompatibilitas CORS Apps Script
                 fetch(DEFAULT_APP_URL, {
                     method: 'POST',
                     headers: {
@@ -932,7 +1031,7 @@
         }
 
         function formatRupiah(val) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+            return new Intl.NumberFormat('id-ID', { style: 'decimal', maximumFractionDigits: 0 }).format(val);
         }
     </script>
 </body>
